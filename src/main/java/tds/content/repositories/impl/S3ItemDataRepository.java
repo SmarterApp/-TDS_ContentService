@@ -29,7 +29,6 @@ import tds.content.repositories.ItemDataRepository;
 import static org.apache.commons.io.Charsets.UTF_8;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 
 @Repository
 @Primary
@@ -67,12 +66,12 @@ public class S3ItemDataRepository implements ItemDataRepository {
      * to
      * items/Item-187-2501/item-187-2501.xml
      *
-     * @param itemDataPath   The item resource path
+     * @param itemDataPath The item resource path
      * @return The resource path relative to our S3 bucket and prefix
      */
     private String buildPath(final String itemDataPath) {
         final String itemName = getName(itemDataPath);
-        final String dirName = capitalize(removeExtension(itemName));
+        final String dirName = removeExtension(itemName);
         return "items/" + dirName + "/" + itemName;
     }
 }

@@ -37,7 +37,6 @@ import tds.itemrenderer.processing.ItemDataService;
 @Service
 public class ItemXmlParserImpl implements ItemXmlParser {
     public static final String UTF8_BOM = "\uFEFF";
-    private final Logger log = LoggerFactory.getLogger(ItemXmlParserImpl.class);
     private final ItemDataService itemDataService;
     private final JAXBContext jaxbContext;
     private final Collection<ItemDocumentMapper> itsMappers;
@@ -60,7 +59,7 @@ public class ItemXmlParserImpl implements ItemXmlParser {
     private ITSDocument mapItemReleaseToDocument(final URI itemPath, final Itemrelease itemXml) {
         ITSDocument document = new ITSDocument();
         document.setBaseUri(itemPath.toString());
-
+        // Call all ItemDocumentMappers to map ITSDocument from Itemrelease
         itsMappers.forEach(mapper -> mapper.mapItemDocument(document, itemXml));
         document.setIsLoaded(true);
 

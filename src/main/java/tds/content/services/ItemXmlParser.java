@@ -18,8 +18,14 @@ import java.net.URI;
 import tds.itemrenderer.data.ITSDocument;
 
 /**
- * Created by emunoz on 6/27/17.
+ * A service responsible for parsing the {@link tds.itemrenderer.data.ITSDocument} item document object
  */
 public interface ItemXmlParser {
-    ITSDocument parseItemDocument(URI uri);
+    /**
+     * Parses the item xml data at the {@link java.net.URI} provided
+     *
+     * @param uri The URI of the item metadata file
+     * @return A mapped {@link tds.itemrenderer.data.ITSDocument} based on the fetched {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
+     */
+    ITSDocument parseItemDocument(final URI uri);
 }

@@ -20,5 +20,11 @@ import tds.itemrenderer.data.xml.itemrelease.Itemrelease;
  * A mapper for mapping an {@link tds.itemrenderer.data.ITSDocument}
  */
 public interface ItemDocumentMapper {
+    /**
+     * Maps the {@link tds.itemrenderer.data.ITSDocument} based on metadata in the {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
+     *
+     * @param document
+     * @param itemXml
+     */
     void mapItemDocument(final ITSDocument document, final Itemrelease itemXml);
 }
