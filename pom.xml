@@ -26,6 +26,8 @@
 		<assertj.version>3.4.1</assertj.version>
 		<mockito.version>1.10.19</mockito.version>
 		<tds-common.version>3.1.1.RELEASE</tds-common.version>
+		<item-renderer.version>3.1.1.RELEASE</item-renderer.version>
+		<item-scoring.version>3.1.1.RELEASE</item-scoring.version>
 	</properties>
 
 	<scm>
@@ -46,11 +48,61 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- AWS -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.11.103</version>
+		</dependency>
+
 		<!-- TDS Dependencies -->
 		<dependency>
 			<groupId>org.opentestsystem.delivery</groupId>
 			<artifactId>tds-common</artifactId>
 			<version>${tds-common.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opentestsystem.delivery</groupId>
+			<artifactId>item-renderer</artifactId>
+			<version>${item-renderer.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-mock</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>el-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.opentestsystem.delivery</groupId>
+			<artifactId>item-scoring-engine</artifactId>
+			<version>${item-scoring.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.cassandra</groupId>
+					<artifactId>cassandra-all</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
