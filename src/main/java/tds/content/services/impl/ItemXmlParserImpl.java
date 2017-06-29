@@ -52,7 +52,6 @@ public class ItemXmlParserImpl implements ItemXmlParser {
     }
 
     @Override
-    @Cacheable
     public ITSDocument parseItemDocument(final URI itemPath) {
         Itemrelease itemXml = unmarshallItemXml(itemPath);
         return mapItemReleaseToDocument(itemPath, itemXml);

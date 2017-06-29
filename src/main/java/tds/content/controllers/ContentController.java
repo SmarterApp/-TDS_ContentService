@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,11 +39,12 @@ public class ContentController {
         this.itemDocumentService = itemDocumentService;
     }
 
-    @GetMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath,
-                                                      final AccLookup accLookup) {
+                                                       @RequestBody final AccLookup accLookup) {
         ITSDocument itemDocument;
+
         try {
             itemDocument = itemDocumentService.loadItemDocument(new URI(itemPath), accLookup);
         } catch (URISyntaxException e) {
