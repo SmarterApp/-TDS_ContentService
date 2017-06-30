@@ -28,9 +28,7 @@ import tds.content.configuration.S3Properties;
 import tds.content.repositories.ItemDataRepository;
 
 import static org.apache.commons.io.Charsets.UTF_8;
-import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.normalize;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Repository
 @Primary

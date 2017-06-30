@@ -23,7 +23,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -31,8 +30,6 @@ import java.util.Collections;
 
 import tds.content.services.ItemXmlParser;
 import tds.itemrenderer.data.ITSDocument;
-import tds.itemrenderer.data.xml.itemrelease.Item;
-import tds.itemrenderer.data.xml.itemrelease.ItemPassage;
 import tds.itemrenderer.data.xml.itemrelease.Itemrelease;
 import tds.itemrenderer.processing.ITSDocumentProcessingException;
 import tds.itemrenderer.processing.ItemDataService;

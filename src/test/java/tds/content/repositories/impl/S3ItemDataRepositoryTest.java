@@ -27,7 +27,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 
-
 import tds.content.configuration.S3Properties;
 
 import static com.google.common.base.Charsets.UTF_8;
