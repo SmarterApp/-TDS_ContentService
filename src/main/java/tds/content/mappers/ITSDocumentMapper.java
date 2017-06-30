@@ -28,65 +28,65 @@ public class ITSDocumentMapper implements ItemDocumentMapper {
     @Override
     public void mapItemDocument(final ITSDocument document, final Itemrelease itemXml) {
         document.setValidated(true);
-        if (itemXml.getVersion () != null) {
-            document.setVersion (Double.parseDouble (itemXml.getVersion ().trim ()));
+        if (itemXml.getVersion() != null) {
+            document.setVersion(Double.parseDouble(itemXml.getVersion().trim()));
         } else {
-            document.setVersion (1.0);
+            document.setVersion(1.0);
         }
 
-        if (document.getVersion () == 0) {
+        if (document.getVersion() == 0) {
             return;
         }
 
-        if (itemXml.getItemPassage () != null) {
-            if (itemXml.getItemPassage ().getClass () == Passage.class) {
-                document.setType (ITSTypes.ITSEntityType.Passage);
+        if (itemXml.getItemPassage() != null) {
+            if (itemXml.getItemPassage().getClass() == Passage.class) {
+                document.setType(ITSTypes.ITSEntityType.Passage);
             } else {
-                document.setType (ITSTypes.ITSEntityType.Item);
+                document.setType(ITSTypes.ITSEntityType.Item);
             }
         }
 
         // make sure the document was defined as either an item or passage
-        if (document.getType () == ITSTypes.ITSEntityType.Unknown) {
+        if (document.getType() == ITSTypes.ITSEntityType.Unknown) {
             return;
         }
 
         // get item/passage info
-        ItemPassage item = itemXml.getItemPassage ();
-        document.setFormat (item.getFormat ());
-        if (item.getId () != null) {
-            document.setId (Long.parseLong (item.getId ().trim ()));
+        ItemPassage item = itemXml.getItemPassage();
+        document.setFormat(item.getFormat());
+        if (item.getId() != null) {
+            document.setId(Long.parseLong(item.getId().trim()));
         }
-        if (item.getBankkey () != null) {
-            document.setBankKey (Long.parseLong (item.getBankkey ().trim ()));
+        if (item.getBankkey() != null) {
+            document.setBankKey(Long.parseLong(item.getBankkey().trim()));
         }
-        if (item.getVersion () != null) {
-            document.setApprovedVersion (Integer.parseInt (item.getVersion ().trim ()));
+        if (item.getVersion() != null) {
+            document.setApprovedVersion(Integer.parseInt(item.getVersion().trim()));
         }
-        if (item.getTutorial () != null) {
-            ITSTutorial itsTutorial = new ITSTutorial ();
-            document.setTutorial (itsTutorial);
-            if (item.getTutorial ().getId () != null) {
-                itsTutorial.setId (Long.parseLong (item.getTutorial ().getId ().trim ()));
+        if (item.getTutorial() != null) {
+            ITSTutorial itsTutorial = new ITSTutorial();
+            document.setTutorial(itsTutorial);
+            if (item.getTutorial().getId() != null) {
+                itsTutorial.setId(Long.parseLong(item.getTutorial().getId().trim()));
             }
-            if (item.getTutorial ().getBankkey () != null) {
-                itsTutorial.setBankKey (Long.parseLong (item.getTutorial ().getBankkey ().trim ()));
-            }
-        }
-
-        if (item.getSoundcue () != null) {
-            ITSSoundCue itsSoundCue = new ITSSoundCue ();
-            document.setSoundCue (itsSoundCue);
-            if (item.getSoundcue ().getId () != null) {
-                itsSoundCue.setId (Long.parseLong (item.getSoundcue ().getId ().trim ()));
-            }
-            if (item.getSoundcue ().getBankkey () != null) {
-                itsSoundCue.setBankKey (Long.parseLong (item.getSoundcue ().getBankkey ().trim ()));
+            if (item.getTutorial().getBankkey() != null) {
+                itsTutorial.setBankKey(Long.parseLong(item.getTutorial().getBankkey().trim()));
             }
         }
 
-        if (item.getGridanswerspace () != null) {
-            document.setGridAnswerSpace (item.getGridanswerspace ().trim ());
+        if (item.getSoundcue() != null) {
+            ITSSoundCue itsSoundCue = new ITSSoundCue();
+            document.setSoundCue(itsSoundCue);
+            if (item.getSoundcue().getId() != null) {
+                itsSoundCue.setId(Long.parseLong(item.getSoundcue().getId().trim()));
+            }
+            if (item.getSoundcue().getBankkey() != null) {
+                itsSoundCue.setBankKey(Long.parseLong(item.getSoundcue().getBankkey().trim()));
+            }
+        }
+
+        if (item.getGridanswerspace() != null) {
+            document.setGridAnswerSpace(item.getGridanswerspace().trim());
         }
     }
 }

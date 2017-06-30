@@ -79,9 +79,4 @@ public class S3ItemDataRepository implements ItemDataRepository {
 
         return normalize("items/" + dirName + "/" + file.getName());
     }
-    private String buildPath2(final String itemDataPath) {
-        final String itemName = getName(itemDataPath);
-        final String dirName = removeExtension(itemName);
-        return "items/" + dirName + "/" + itemName;
-    }
 }
