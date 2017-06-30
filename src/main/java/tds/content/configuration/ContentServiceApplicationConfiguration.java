@@ -20,16 +20,32 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import tds.common.configuration.CacheConfiguration;
+import tds.common.configuration.DataSourceConfiguration;
+import tds.common.configuration.EventLoggerConfiguration;
+import tds.common.configuration.JacksonObjectMapperConfiguration;
+import tds.common.configuration.RedisClusterConfiguration;
+import tds.common.configuration.SecurityConfiguration;
+import tds.common.web.advice.ExceptionAdvice;
 import tds.itemrenderer.configuration.ItemDocumentSettings;
 import tds.itemrenderer.data.ITSDocument;
 import tds.itemrenderer.data.xml.itemrelease.Itemrelease;
 
 @Configuration
+@Import({
+    ExceptionAdvice.class,
+    JacksonObjectMapperConfiguration.class,
+    RedisClusterConfiguration.class,
+    CacheConfiguration.class,
+    SecurityConfiguration.class,
+    EventLoggerConfiguration.class,
+})
 public class ContentServiceApplicationConfiguration {
     @Bean
     public JAXBContext jaxbContext() throws JAXBException {
