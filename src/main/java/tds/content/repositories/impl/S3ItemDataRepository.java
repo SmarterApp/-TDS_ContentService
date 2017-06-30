@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
+import java.io.File;
 import java.io.IOException;
 
 import tds.content.configuration.S3Properties;
@@ -28,6 +29,7 @@ import tds.content.repositories.ItemDataRepository;
 
 import static org.apache.commons.io.Charsets.UTF_8;
 import static org.apache.commons.io.FilenameUtils.getName;
+import static org.apache.commons.io.FilenameUtils.normalize;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Repository
@@ -70,6 +72,14 @@ public class S3ItemDataRepository implements ItemDataRepository {
      * @return The resource path relative to our S3 bucket and prefix
      */
     private String buildPath(final String itemDataPath) {
+        final File file = new File(normalize(itemDataPath));
+        final String dirName = file.getParentFile() == null
+            ? ""
+            : file.getParentFile().getName();
+
+        return normalize("items/" + dirName + "/" + file.getName());
+    }
+    private String buildPath2(final String itemDataPath) {
         final String itemName = getName(itemDataPath);
         final String dirName = removeExtension(itemName);
         return "items/" + dirName + "/" + itemName;
