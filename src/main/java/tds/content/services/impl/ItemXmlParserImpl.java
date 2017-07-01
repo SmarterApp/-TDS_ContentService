@@ -14,6 +14,7 @@
 package tds.content.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBContext;
@@ -24,6 +25,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.Collection;
 
+import tds.common.cache.CacheType;
 import tds.content.mappers.ItemDocumentMapper;
 import tds.content.services.ItemXmlParser;
 import tds.itemrenderer.data.ITSDocument;
@@ -48,6 +50,7 @@ public class ItemXmlParserImpl implements ItemXmlParser {
     }
 
     @Override
+    @Cacheable(CacheType.LONG_TERM)
     public ITSDocument parseItemDocument(final URI itemPath) {
         Itemrelease itemXml = unmarshallItemXml(itemPath);
         return mapItemReleaseToDocument(itemPath, itemXml);
