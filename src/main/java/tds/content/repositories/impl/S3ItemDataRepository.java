@@ -61,7 +61,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
     }
 
     /**
-     * This is a fragile path trimmer that reduces resource paths from something like:
+     * This is a path trimmer that reduces resource paths from something like:
      * /usr/local/tomcat/resources/tds/bank/items/Item-187-2501/item-187-2501.xml
      * to
      * items/Item-187-2501/item-187-2501.xml

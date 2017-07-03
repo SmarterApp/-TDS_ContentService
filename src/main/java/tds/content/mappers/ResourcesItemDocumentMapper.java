@@ -26,21 +26,23 @@ import tds.itemrenderer.data.xml.itemrelease.Resource;
 public class ResourcesItemDocumentMapper implements ItemDocumentMapper {
     @Override
     public void mapItemDocument(final ITSDocument document, final Itemrelease itemXml) {
-        if (itemXml.getItemPassage().getResourceslist() != null) {
-            List<Resource> resources = itemXml.getItemPassage().getResourceslist().getResource();
+        if (itemXml.getItemPassage().getResourceslist() == null) {
+            return;
+        }
 
-            if (resources != null && resources.size() > 0) {
-                for (Resource resource : resources) {
-                    ITSResource itsResource = new ITSResource();
-                    itsResource.setType(resource.getType());
-                    if (resource.getId() != null) {
-                        itsResource.setId(Long.parseLong(resource.getId().trim()));
-                    }
-                    if (resource.getBankkey() != null) {
-                        itsResource.setBankKey(Long.parseLong(resource.getBankkey().trim()));
-                    }
-                    document.getResources().add(itsResource);
+        List<Resource> resources = itemXml.getItemPassage().getResourceslist().getResource();
+
+        if (resources != null && resources.size() > 0) {
+            for (Resource resource : resources) {
+                ITSResource itsResource = new ITSResource();
+                itsResource.setType(resource.getType());
+                if (resource.getId() != null) {
+                    itsResource.setId(Long.parseLong(resource.getId().trim()));
                 }
+                if (resource.getBankkey() != null) {
+                    itsResource.setBankKey(Long.parseLong(resource.getBankkey().trim()));
+                }
+                document.getResources().add(itsResource);
             }
         }
     }

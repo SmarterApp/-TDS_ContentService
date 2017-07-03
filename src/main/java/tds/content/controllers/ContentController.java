@@ -47,7 +47,7 @@ public class ContentController {
         try {
             itemDocument = itemDocumentService.loadItemDocument(new URI(itemPath), accLookup);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The provided item path was malformed.");
+            throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
 
         return ResponseEntity.ok(itemDocument);

@@ -40,28 +40,25 @@ public class RendererSpecItemDocumentMapper implements ItemDocumentMapper {
     public void mapItemDocument(final ITSDocument document, final Itemrelease itemXml) {
         ItemPassage item = itemXml.getItemPassage();
 
-        if (item.getRendererSpec() != null) {
-            String fileName = itemXml.getItemPassage().getRendererSpec().getFilename();
+        if (item.getRendererSpec() == null) {
+            return;
+        }
 
-            if (fileName == null) {
-                document.setRendererSpec(itemXml.getItemPassage().getRendererSpec().getValue());
-                return;
-            }
+        String fileName = itemXml.getItemPassage().getRendererSpec().getFilename();
 
-            String rendererSpecPath = document.getBaseUri().replace(Path.getFileName(document.getBaseUri ()), "");
-            rendererSpecPath += fileName.trim();
+        if (fileName == null) {
+            document.setRendererSpec(itemXml.getItemPassage().getRendererSpec().getValue());
+            return;
+        }
 
-            if (rendererSpecService != null) {
-                try {
-                    document.setRendererSpec(rendererSpecService.findOne(rendererSpecPath));
-                    return;
-                } catch (final IOException e) {
-                    throw new ITSDocumentProcessingException("Problem reading Renderer Spec", e);
-                }
-            }
+        String rendererSpecPath = document.getBaseUri().replace(Path.getFileName(document.getBaseUri ()), "");
+        rendererSpecPath += fileName.trim();
 
-            URI rendererSpecUri = ITSDocumentHelper.createUri(rendererSpecPath);
-            document.setRendererSpec(ITSDocumentHelper.getContents (rendererSpecUri));
+        try {
+            document.setRendererSpec(rendererSpecService.findOne(rendererSpecPath));
+            return;
+        } catch (final IOException e) {
+            throw new ITSDocumentProcessingException("Problem reading Renderer Spec", e);
         }
     }
 }

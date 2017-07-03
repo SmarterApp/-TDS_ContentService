@@ -39,15 +39,13 @@ public class ITSDocumentMapper implements ItemDocumentMapper {
         }
 
         if (itemXml.getItemPassage() != null) {
-            if (itemXml.getItemPassage().getClass() == Passage.class) {
+            if (itemXml.getItemPassage() instanceof Passage) {
                 document.setType(ITSTypes.ITSEntityType.Passage);
             } else {
                 document.setType(ITSTypes.ITSEntityType.Item);
             }
-        }
-
-        // make sure the document was defined as either an item or passage
-        if (document.getType() == ITSTypes.ITSEntityType.Unknown) {
+        } else if (document.getType() == ITSTypes.ITSEntityType.Unknown){
+            // make sure the document was defined as either an item or passage
             return;
         }
 

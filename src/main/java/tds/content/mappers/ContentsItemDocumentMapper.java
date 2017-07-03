@@ -66,21 +66,13 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
             if (content.getQti() != null) {
                 itsContent.setQti(readQti(content.getQti()));
             }
-            if (content.getIllustration() != null) {
-                itsContent.setIllustration(content.getIllustration());
-            }
-            if (content.getIllustrationTts() != null) {
-                itsContent.setIllustrationTTS(content.getIllustrationTts());
-            }
-            if (content.getStem() != null) {
-                itsContent.setStem(content.getStem());
-            }
-            if (content.getStemTts() != null) {
-                itsContent.setStemTTS(content.getStemTts());
-            }
-            if (content.getTitle() != null) {
-                itsContent.setTitle(content.getTitle());
-            }
+
+            itsContent.setIllustration(content.getIllustration());
+            itsContent.setIllustrationTTS(content.getIllustrationTts());
+            itsContent.setStem(content.getStem());
+            itsContent.setStemTTS(content.getStemTts());
+            itsContent.setTitle(content.getTitle());
+
             if (content.getOptionlist() != null) {
                 itsContent.setOptions(readOptions(document, content.getOptionlist()));
             }
@@ -98,13 +90,11 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         }
     }
 
-    private ITSQTI readQti(Qti qti) {
-        ITSQTI itsQti = new ITSQTI();
+    private static ITSQTI readQti(Qti qti) {
+        final ITSQTI itsQti = new ITSQTI();
 
-        if (qti.getSpec() != null) {
-            // get the qti specification ("itemBody" or "assessmentItem")
-            itsQti.setSpecification(qti.getSpec());
-        }
+        // get the qti specification ("itemBody" or "assessmentItem")
+        itsQti.setSpecification(qti.getSpec());
 
         if (qti.getContent() != null) {
             itsQti.setXml(qti.getContent().trim());
@@ -120,7 +110,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return itsQti;
     }
 
-    private ITSOptionList readOptions(final ITSDocument document, final Optionlist optionlist) {
+    private static ITSOptionList readOptions(final ITSDocument document, final Optionlist optionlist) {
         List<Option> options = optionlist.getOption();
         ITSOptionList itsOptionList = new ITSOptionList();
 
@@ -140,7 +130,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return itsOptionList;
     }
 
-    private ITSOption readOption(final ITSDocument document, final Option option) {
+    private static ITSOption readOption(final ITSDocument document, final Option option) {
         ITSOption itsOption = new ITSOption();
         String name = option.getName().trim();
 
@@ -159,7 +149,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return itsOption;
     }
 
-    private ITSKeyboard readKeyboard(final Keyboard keyboard) {
+    private static ITSKeyboard readKeyboard(final Keyboard keyboard) {
         ITSKeyboard itsKeyboard = new ITSKeyboard();
 
         if (keyboard.getKeyboardRow() != null && keyboard.getKeyboardRow().size() > 0) {
@@ -190,7 +180,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return itsKeyboard;
     }
 
-    private List<ITSAttachment> readAttachments(final ITSDocument document, final List<Attachment> attachments) {
+    private static List<ITSAttachment> readAttachments(final ITSDocument document, final List<Attachment> attachments) {
         List<ITSAttachment> itsAttachments = new ArrayList<>();
 
         if (attachments != null && attachments.size() > 0) {
@@ -211,7 +201,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return itsAttachments;
     }
 
-    private APIPXml readApip(ApipAccessibility apipAccessibility) {
+    private static APIPXml readApip(ApipAccessibility apipAccessibility) {
         APIPXml apipXml = null;
 
         if (apipAccessibility.getAccessibilityInfo() != null && apipAccessibility.getAccessibilityInfo().getAccessElement() != null) {
@@ -227,7 +217,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return apipXml;
     }
 
-    private APIPAccessElement getApipAccessElement(AccessElement accessElement) {
+    private static APIPAccessElement getApipAccessElement(AccessElement accessElement) {
         APIPAccessElement apipAccessElement = new APIPAccessElement();
         apipAccessElement.setIdentifier(accessElement.getIdentifier());
         ContentLinkInfo contentLinkInfo = accessElement.getContentLinkInfo();
@@ -247,7 +237,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return apipAccessElement;
     }
 
-    private APIPRelatedElementInfo getApipRelatedElementInfo(final RelatedElementInfo relatedElementInfo) {
+    private static APIPRelatedElementInfo getApipRelatedElementInfo(final RelatedElementInfo relatedElementInfo) {
         APIPRelatedElementInfo apipRelatedElementInfo = new APIPRelatedElementInfo();
 
         if (relatedElementInfo.getReadAloud() != null) {
@@ -277,7 +267,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         return apipRelatedElementInfo;
     }
 
-    private void processGenericElements(final ITSContent itsContent, final Content content) {
+    private static void processGenericElements(final ITSContent itsContent, final Content content) {
         if (content.getConstraints() != null) {
             itsContent.getGenericElements().add(content.getConstraints());
         }
@@ -286,7 +276,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         }
     }
 
-    private String getFilePath(final ITSDocument document) {
+    private static String getFilePath(final ITSDocument document) {
         return document.getBaseUri().replace(Path.getFileName(document.getBaseUri()), "");
     }
 }
