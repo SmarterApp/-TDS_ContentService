@@ -90,6 +90,23 @@ public class S3ItemDataRepositoryTest {
         assertThat(request.getKey()).isEqualTo(scoringS3Properties.getItemPrefix() + "items/My-Item/My-Item.xml");
     }
 
+    @Test
+    public void itShouldTrimLongUrisStimuli() throws Exception {
+        final String longPath = "/usr/local/tomcat/resources/tds/bank/stimuli/My-Stim/My-Stim.xml";
+
+        final S3Object response = mock(S3Object.class);
+        when(response.getObjectContent()).thenReturn(response("Response Data"));
+
+        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenReturn(response);
+
+        final String value = itemReader.findOne(longPath);
+        final ArgumentCaptor<GetObjectRequest> objectRequestArgumentCaptor = ArgumentCaptor.forClass(GetObjectRequest.class);
+        verify(mockAmazonS3).getObject(objectRequestArgumentCaptor.capture());
+
+        final GetObjectRequest request = objectRequestArgumentCaptor.getValue();
+        assertThat(request.getKey()).isEqualTo(scoringS3Properties.getItemPrefix() + "stimuli/My-Stim/My-Stim.xml");
+    }
+
     private S3ObjectInputStream response(final String body) throws Exception {
         final ByteArrayInputStream delegate = new ByteArrayInputStream(body.getBytes(UTF_8));
         return new S3ObjectInputStream(delegate, mock(HttpRequestBase.class));
