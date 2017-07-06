@@ -23,11 +23,11 @@ import tds.itemrenderer.data.ITSDocument;
  */
 public interface ItemDocumentService {
   /**
-   * Loads the {@link tds.itemrenderer.data.IITSDocument} representing item document
+   * Loads the {@link tds.itemrenderer.data.ITSDocument} representing item document
    *
    * @param uri            the URI to the document
    * @param accommodations the {@link tds.itemrenderer.data.AccLookup} associated with the document
-   * @return {@link tds.itemrenderer.data.IITSDocument}
+   * @return {@link tds.itemrenderer.data.ITSDocument}
    */
   ITSDocument loadItemDocument(URI uri, AccLookup accommodations);
 }
