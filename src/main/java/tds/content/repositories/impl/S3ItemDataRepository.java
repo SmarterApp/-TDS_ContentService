@@ -17,6 +17,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -74,7 +75,12 @@ public class S3ItemDataRepository implements ItemDataRepository {
         final String dirName = file.getParentFile() == null
             ? ""
             : file.getParentFile().getName();
+        // If the directory name is not present, default to "items"
+        final String itemsOrStimuli = StringUtils.isEmpty(dirName)
+            ? "items"
+            : file.getParentFile().getParentFile().getName();
 
-        return normalize("items/" + dirName + "/" + file.getName());
+
+        return normalize(itemsOrStimuli + "/" + dirName + "/" + file.getName());
     }
 }
