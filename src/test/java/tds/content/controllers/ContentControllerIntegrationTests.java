@@ -60,6 +60,7 @@ public class ContentControllerIntegrationTests {
     public void shouldReturnITSDocument() throws Exception {
         ITSDocument document = random(ITSDocument.class);
         URI uri = new URI("/path/to/item.xml");
+        document.setBaseUri(uri.toString());
         AccLookup accLookup = random(AccLookup.class);
 
         ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
