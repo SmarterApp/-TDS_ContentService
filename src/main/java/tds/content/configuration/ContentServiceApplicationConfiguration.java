@@ -13,6 +13,7 @@
 
 package tds.content.configuration;
 
+import TDS.Shared.Security.IEncryption;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
@@ -32,6 +33,7 @@ import tds.common.configuration.JacksonObjectMapperConfiguration;
 import tds.common.configuration.RedisClusterConfiguration;
 import tds.common.configuration.SecurityConfiguration;
 import tds.common.web.advice.ExceptionAdvice;
+import tds.content.security.Encryption;
 import tds.itemrenderer.data.xml.itemrelease.Itemrelease;
 
 @Configuration
@@ -66,5 +68,10 @@ public class ContentServiceApplicationConfiguration {
             .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
             .withRegion(Regions.US_WEST_2)
             .build();
+    }
+
+    @Bean
+    public IEncryption encryption(final ContentServiceProperties properties) {
+        return new Encryption(properties.getEncryptionKey());
     }
 }

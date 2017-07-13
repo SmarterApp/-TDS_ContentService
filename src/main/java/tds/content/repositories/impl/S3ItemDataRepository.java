@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import tds.content.configuration.S3Properties;
 import tds.content.repositories.ItemDataRepository;
@@ -56,6 +57,24 @@ public class S3ItemDataRepository implements ItemDataRepository {
             }
 
             return IOUtils.toString(item.getObjectContent(), UTF_8);
+        } catch (final AmazonS3Exception ex) {
+            throw new IOException("Unable to read S3 item: " + itemLocation, ex);
+        }
+    }
+
+    @Override
+    public InputStream findResource(final String itemPath) throws IOException {
+        final String itemLocation = s3Properties.getItemPrefix() + buildPath(itemPath);
+
+        try {
+            final S3Object item = s3Client.getObject(new GetObjectRequest(
+                s3Properties.getBucketName(), itemLocation));
+
+            if (item == null) {
+                throw new IOException("Could not find file for " + itemLocation);
+            }
+
+            return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {
             throw new IOException("Unable to read S3 item: " + itemLocation, ex);
         }

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import tds.content.repositories.ItemDataRepository;
@@ -38,5 +39,10 @@ public class ItemDataServiceImpl implements ItemDataService {
     @Override
     public String readData(final URI itemPath) throws IOException {
         return itemDataRepository.findOne(itemPath.toASCIIString());
+    }
+
+    @Override
+    public InputStream readResourceData(final URI uri) throws IOException {
+        return itemDataRepository.findResource(uri.toASCIIString());
     }
 }

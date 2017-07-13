@@ -13,6 +13,7 @@
 
 package tds.content.controllers;
 
+import com.esotericsoftware.kryo.io.Input;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Test;
@@ -27,11 +28,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URI;
 
 import tds.common.configuration.SecurityConfiguration;
 import tds.common.web.advice.ExceptionAdvice;
-import tds.content.services.ItemDocumentService;
+import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
 
@@ -41,6 +45,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -54,7 +59,7 @@ public class ContentControllerIntegrationTests {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private ItemDocumentService itemDocumentService;
+    private ContentService contentService;
 
     @Test
     public void shouldReturnITSDocument() throws Exception {
@@ -63,7 +68,7 @@ public class ContentControllerIntegrationTests {
         AccLookup accLookup = random(AccLookup.class);
 
         ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-        when(itemDocumentService.loadItemDocument(eq(uri), isA(AccLookup.class))).thenReturn(document);
+        when(contentService.loadItemDocument(eq(uri), isA(AccLookup.class))).thenReturn(document);
         URI restUri = UriComponentsBuilder.fromUriString("/item").build().toUri();
 
         MvcResult result = http.perform(post(restUri)
@@ -75,5 +80,21 @@ public class ContentControllerIntegrationTests {
 
         ITSDocument parsedDocument = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ITSDocument.class);
         assertThat(parsedDocument.getBaseUri()).isEqualTo(document.getBaseUri());
+    }
+
+    @Test
+    public void shouldReturnResource() throws Exception {
+        InputStream stream = new ByteArrayInputStream("Hello".getBytes());
+        URI uri = new URI("/path/to/item.xml");
+
+        when(contentService.loadResource(uri)).thenReturn(stream);
+        URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
+
+        MvcResult result = http.perform(get(restUri)
+            .param("resourcePath", uri.toString()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Hello");
     }
 }

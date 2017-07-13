@@ -36,23 +36,20 @@ import tds.itemrenderer.processing.ItemDataService;
 @Service
 public class ItemXmlParserImpl implements ItemXmlParser {
     public static final String UTF8_BOM = "\uFEFF";
-    private final ItemDataService itemDataService;
     private final JAXBContext jaxbContext;
     private final Collection<ItemDocumentMapper> itsMappers;
 
     @Autowired
-    public ItemXmlParserImpl(final ItemDataService itemDataService,
-                             final JAXBContext jaxbContext,
+    public ItemXmlParserImpl(final JAXBContext jaxbContext,
                              final Collection<ItemDocumentMapper> itsMappers) {
-        this.itemDataService = itemDataService;
         this.jaxbContext = jaxbContext;
         this.itsMappers = itsMappers;
     }
 
     @Override
     @Cacheable(CacheType.LONG_TERM)
-    public ITSDocument parseItemDocument(final URI itemPath) {
-        Itemrelease itemXml = unmarshallItemXml(itemPath);
+    public ITSDocument parseItemDocument(final URI itemPath, final String itemData) {
+        Itemrelease itemXml = unmarshallItemXml(itemPath, itemData);
         return mapItemReleaseToDocument(itemPath, itemXml);
     }
 
@@ -67,13 +64,11 @@ public class ItemXmlParserImpl implements ItemXmlParser {
         return document;
     }
 
-    private Itemrelease unmarshallItemXml(final URI itemPath) {
+    private Itemrelease unmarshallItemXml(final URI itemPath, final String itemData) {
         try {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            StringReader reader = removeBomIfPresent(itemDataService.readData(itemPath));
+            StringReader reader = removeBomIfPresent(itemData);
             return (Itemrelease) jaxbUnmarshaller.unmarshal(reader);
-        } catch (IOException ioe) {
-            throw new ITSDocumentProcessingException(ioe);
         } catch (JAXBException e) {
             String message = String.format("The XML schema was not valid for the file \"%s\"", itemPath);
             throw new ITSDocumentProcessingException (message + ":" + e.getMessage (), e);

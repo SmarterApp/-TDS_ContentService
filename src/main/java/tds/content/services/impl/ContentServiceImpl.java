@@ -13,13 +13,16 @@
 
 package tds.content.services.impl;
 
+import TDS.Shared.Security.IEncryption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
-import tds.content.configuration.S3Properties;
-import tds.content.services.ItemDocumentService;
+import tds.content.configuration.ContentServiceProperties;
+import tds.content.services.ContentService;
 import tds.content.services.ItemXmlParser;
 import tds.itemrenderer.ITSDocumentFactory;
 import tds.itemrenderer.apip.APIPMode;
@@ -30,27 +33,43 @@ import tds.itemrenderer.data.AccProperties;
 import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.processing.ITSDocumentProcessingException;
 import tds.itemrenderer.processing.ITSHtmlSanitizeTask;
 import tds.itemrenderer.processing.ITSProcessorApipTasks;
 import tds.itemrenderer.processing.ITSProcessorTasks;
 import tds.itemrenderer.processing.ITSUrlResolver;
 import tds.itemrenderer.processing.ITSUrlTask;
+import tds.itemrenderer.processing.ItemDataService;
 
 @Service
-public class ItemDocumentServiceImpl implements ItemDocumentService {
+public class ContentServiceImpl implements ContentService {
     private final ItemXmlParser itemXmlParser;
-    private final S3Properties properties;
+    private final ItemDataService itemDataService;
+    private final ContentServiceProperties properties;
+    private final IEncryption encryption;
 
     @Autowired
-    public ItemDocumentServiceImpl(final ItemXmlParser itemXmlParser,
-                                   final S3Properties properties) {
+    public ContentServiceImpl(final ItemXmlParser itemXmlParser,
+                              final ItemDataService itemDataService,
+                              final IEncryption encryption,
+                              final ContentServiceProperties contentServiceProperties) {
         this.itemXmlParser = itemXmlParser;
-        this.properties = properties;
+        this.itemDataService = itemDataService;
+        this.properties = contentServiceProperties;
+        this.encryption = encryption;
     }
 
     @Override
     public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations) {
-        ITSDocument itsDocument = itemXmlParser.parseItemDocument(uri);
+        final String itemDataXml;
+
+        try {
+            itemDataXml = itemDataService.readData(uri);
+        } catch (IOException e) {
+            throw new ITSDocumentProcessingException(e);
+        }
+
+        ITSDocument itsDocument = itemXmlParser.parseItemDocument(uri, itemDataXml);
 
         // check if valid xml
         if (!itsDocument.getValidated()) {
@@ -61,6 +80,11 @@ public class ItemDocumentServiceImpl implements ItemDocumentService {
         executeProcessing(itsDocument, accommodations, true);
 
         return itsDocument;
+    }
+
+    @Override
+    public InputStream loadResource(final URI resourcePath) throws IOException {
+        return itemDataService.readResourceData(resourcePath);
     }
 
     private void executeProcessing(ITSDocument itsDocument, AccLookup accommodations, boolean resolveUrls) {
@@ -101,11 +125,12 @@ public class ItemDocumentServiceImpl implements ItemDocumentService {
             processorTasks.registerTask(apipTasks);
         }
 
-        ITSUrlResolver resolver = new ITSUrlResolver(itsDocument.getBaseUri(), properties.isEncryptionEnabled());
+        ITSUrlResolver resolver = new ITSUrlResolver(itsDocument.getBaseUri(), properties.getStudentUrl(),
+            properties.isEncryptionEnabled(), encryption);
 
         // add task for URL's
         if (resolveUrls && apipMode != APIPMode.BRF) {
-            processorTasks.registerTask(new ITSUrlTask(resolver));
+            processorTasks.registerTask(new ITSUrlTask(properties.isEncryptionEnabled(), properties.getStudentUrl(), encryption));
         }
 
         // add task to sanitize the html output to fix up any undesirable artifacts in the items coming from ITS

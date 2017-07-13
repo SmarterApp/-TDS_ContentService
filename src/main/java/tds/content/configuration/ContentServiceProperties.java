@@ -16,46 +16,36 @@ package tds.content.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * Contains the properties for s3 connections
- */
 @Component
-@ConfigurationProperties(prefix = "content.s3")
-public class S3Properties {
-    private String accessKey;
-    private String secretKey;
-    private String bucketName;
-    private String itemPrefix;
+@ConfigurationProperties(prefix = "tds")
+public class ContentServiceProperties {
+    public static final String ENCRYPTION_KEY_NAME = "EncryptionKey";
 
-    public String getAccessKey() {
-        return accessKey;
+    private boolean encryptionEnabled;
+    private String studentUrl;
+    private String encryptionKey;
+
+    public String getStudentUrl() {
+        return this.studentUrl;
     }
 
-    public void setAccessKey(final String accessKey) {
-        this.accessKey = accessKey;
+    public void setStudentUrl(final String studentUrl) {
+        this.studentUrl = studentUrl;
     }
 
-    public String getSecretKey() {
-        return secretKey;
+    public boolean isEncryptionEnabled() {
+        return encryptionEnabled;
     }
 
-    public void setSecretKey(final String secretKey) {
-        this.secretKey = secretKey;
+    public void setEncryptionEnabled(final boolean encryptionEnabled) {
+        this.encryptionEnabled = encryptionEnabled;
     }
 
-    public String getBucketName() {
-        return bucketName;
+    public String getEncryptionKey() {
+        return encryptionKey;
     }
 
-    public void setBucketName(final String bucketName) {
-        this.bucketName = bucketName;
-    }
-
-    public String getItemPrefix() {
-        return itemPrefix;
-    }
-
-    public void setItemPrefix(final String itemPrefix) {
-        this.itemPrefix = itemPrefix;
+    public void setEncryptionKey(final String encryptionKey) {
+        this.encryptionKey = encryptionKey;
     }
 }

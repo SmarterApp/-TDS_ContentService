@@ -25,7 +25,8 @@ public interface ItemXmlParser {
      * Parses the item xml data at the {@link java.net.URI} provided
      *
      * @param uri The URI of the item metadata file
+     * @param itemData The stringified item xml data
      * @return A mapped {@link tds.itemrenderer.data.ITSDocument} based on the fetched {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
      */
-    ITSDocument parseItemDocument(final URI uri);
+    ITSDocument parseItemDocument(final URI uri, final String itemData);
 }

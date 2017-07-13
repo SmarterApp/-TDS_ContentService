@@ -14,6 +14,7 @@
 package tds.content.repositories;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Implementations of this interface are responsible for providing exam item data.
@@ -23,8 +24,17 @@ public interface ItemDataRepository {
     /**
      * Load an exam item by path.
      *
-     * @param itemPath  The item path
-     * @return  The exam item xml content
+     * @param itemPath The item path
+     * @return The exam item xml content
      */
     String findOne(final String itemPath) throws IOException;
+
+    /**
+     * Load a resource by path
+     *
+     * @param resourcePath The path of the resource
+     * @return The resource input stream
+     * @throws IOException If there is an issue reading the resource data
+     */
+    InputStream findResource(final String resourcePath) throws IOException;
 }
