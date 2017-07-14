@@ -22,16 +22,7 @@ public class ContentServiceProperties {
     public static final String ENCRYPTION_KEY_NAME = "EncryptionKey";
 
     private boolean encryptionEnabled;
-    private String studentUrl;
     private String encryptionKey;
-
-    public String getStudentUrl() {
-        return this.studentUrl;
-    }
-
-    public void setStudentUrl(final String studentUrl) {
-        this.studentUrl = studentUrl;
-    }
 
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;

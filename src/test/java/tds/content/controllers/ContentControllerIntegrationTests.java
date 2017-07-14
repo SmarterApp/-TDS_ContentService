@@ -41,6 +41,7 @@ import tds.itemrenderer.data.ITSDocument;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
@@ -65,14 +66,16 @@ public class ContentControllerIntegrationTests {
     public void shouldReturnITSDocument() throws Exception {
         ITSDocument document = random(ITSDocument.class);
         URI uri = new URI("/path/to/item.xml");
+        String contextPath = random(String.class);
         AccLookup accLookup = random(AccLookup.class);
 
         ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-        when(contentService.loadItemDocument(eq(uri), isA(AccLookup.class))).thenReturn(document);
+        when(contentService.loadItemDocument(eq(uri), isA(AccLookup.class), anyString())).thenReturn(document);
         URI restUri = UriComponentsBuilder.fromUriString("/item").build().toUri();
 
         MvcResult result = http.perform(post(restUri)
             .param("itemPath", uri.toString())
+            .param("contextPath", contextPath)
             .content(ow.writeValueAsString(accLookup))
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

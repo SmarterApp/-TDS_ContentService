@@ -66,14 +66,14 @@ public class ContentServiceImplTest {
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(false);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
-        contentService.loadItemDocument(uri, null);
+        contentService.loadItemDocument(uri, null, null);
     }
 
     @Test(expected = ITSDocumentProcessingException.class)
     public void shouldThrowOnIOException() throws IOException {
         final URI uri = random(URI.class);
         when(mockItemDataService.readData(uri)).thenThrow(IOException.class);
-        contentService.loadItemDocument(uri, null);
+        contentService.loadItemDocument(uri, null, null);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class ContentServiceImplTest {
         document.setValidated(true);
         when(mockItemDataService.readData(uri)).thenReturn(itemXml);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
-        ITSDocument retDocument = contentService.loadItemDocument(uri, null);
+        ITSDocument retDocument = contentService.loadItemDocument(uri, null, null);
         verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
         verify(mockItemDataService).readData(uri);
         assertThat(retDocument).isEqualTo(document);
@@ -94,13 +94,14 @@ public class ContentServiceImplTest {
     public void shouldLoadItemDocumentWithAccommodations() throws IOException {
         final URI uri = random(URI.class);
         final String itemXml = random(String.class);
+        final String contentUrl = random(String.class);
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(true);
         final AccLookup accLookup = random(AccLookup.class);
         when(mockItemDataService.readData(uri)).thenReturn(itemXml);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
 
-        ITSDocument retDocument = contentService.loadItemDocument(uri, accLookup);
+        ITSDocument retDocument = contentService.loadItemDocument(uri, accLookup, contentUrl);
 
         verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
         verify(mockItemDataService).readData(uri);
