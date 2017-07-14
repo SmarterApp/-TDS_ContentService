@@ -85,7 +85,7 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
             if (content.getAttachmentlist() != null) {
                 itsContent.setAttachments(readAttachments(document, content.getAttachmentlist().getAttachment()));
             }
-            processGenericElements(itsContent, content);
+
             document.addContent(itsContent);
         }
     }
@@ -265,15 +265,6 @@ public class ContentsItemDocumentMapper implements ItemDocumentMapper {
         }
 
         return apipRelatedElementInfo;
-    }
-
-    private static void processGenericElements(final ITSContent itsContent, final Content content) {
-        if (content.getConstraints() != null) {
-            itsContent.getGenericElements().add(content.getConstraints());
-        }
-        if (content.getSearch() != null) {
-            itsContent.getGenericElements().add(content.getSearch());
-        }
     }
 
     private static String getFilePath(final ITSDocument document) {

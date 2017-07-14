@@ -19,13 +19,16 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
+import tds.common.web.exceptions.NotFoundException;
 import tds.content.configuration.S3Properties;
 import tds.content.repositories.ItemDataRepository;
 
@@ -63,20 +66,23 @@ public class S3ItemDataRepository implements ItemDataRepository {
     }
 
     @Override
-    public InputStream findResource(final String itemPath) throws IOException {
-        final String itemLocation = s3Properties.getItemPrefix() + buildPath(itemPath);
+    public InputStream findResource(final String resourcePath) throws IOException {
+        final String resourceLocation = s3Properties.getItemPrefix() + buildPath(resourcePath);
 
         try {
             final S3Object item = s3Client.getObject(new GetObjectRequest(
-                s3Properties.getBucketName(), itemLocation));
+                s3Properties.getBucketName(), resourceLocation));
 
             if (item == null) {
-                throw new IOException("Could not find file for " + itemLocation);
+                throw new IOException("Could not find file for " + resourceLocation);
             }
 
             return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {
-            throw new IOException("Unable to read S3 item: " + itemLocation, ex);
+            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                throw new NotFoundException(String.format("Could not find resource at resource location %s", resourcePath));
+            }
+            throw new IOException("Unable to read S3 item: " + resourceLocation, ex);
         }
     }
 
