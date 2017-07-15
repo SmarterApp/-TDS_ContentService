@@ -47,7 +47,7 @@ public class ContentController {
 
     @PostMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam final String contextPath,
+    public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam(required = false) final String contextPath,
                                                        @RequestBody final AccLookup accLookup) {
         ITSDocument itemDocument;
 
