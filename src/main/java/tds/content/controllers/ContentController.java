@@ -13,9 +13,8 @@
 
 package tds.content.controllers;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -73,11 +72,11 @@ public class ContentController {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        ByteArrayResource resource = new ByteArrayResource(IOUtils.toByteArray(inputStream));
+        InputStreamResource resource = new InputStreamResource(inputStream);
 
         return ResponseEntity.ok()
             .headers(headers)
-            .contentLength(resource.contentLength())
+//            .contentLength(resource.contentLength())
             .body(resource);
     }
 }

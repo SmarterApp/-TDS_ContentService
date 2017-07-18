@@ -33,7 +33,7 @@ import tds.common.configuration.JacksonObjectMapperConfiguration;
 import tds.common.configuration.RedisClusterConfiguration;
 import tds.common.configuration.SecurityConfiguration;
 import tds.common.web.advice.ExceptionAdvice;
-import tds.content.security.Encryption;
+import tds.itemrenderer.security.Encryption;
 import tds.itemrenderer.data.xml.itemrelease.Itemrelease;
 
 @Configuration

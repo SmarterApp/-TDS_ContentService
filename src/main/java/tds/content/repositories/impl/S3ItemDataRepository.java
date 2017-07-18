@@ -55,10 +55,6 @@ public class S3ItemDataRepository implements ItemDataRepository {
             final S3Object item = s3Client.getObject(new GetObjectRequest(
                 s3Properties.getBucketName(), itemLocation));
 
-            if (item == null) {
-                throw new IOException("Could not find file for " + itemLocation);
-            }
-
             return IOUtils.toString(item.getObjectContent(), UTF_8);
         } catch (final AmazonS3Exception ex) {
             throw new IOException("Unable to read S3 item: " + itemLocation, ex);
@@ -72,10 +68,6 @@ public class S3ItemDataRepository implements ItemDataRepository {
         try {
             final S3Object item = s3Client.getObject(new GetObjectRequest(
                 s3Properties.getBucketName(), resourceLocation));
-
-            if (item == null) {
-                throw new IOException("Could not find file for " + resourceLocation);
-            }
 
             return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {

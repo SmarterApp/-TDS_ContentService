@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import tds.content.configuration.ContentServiceProperties;
-import tds.content.configuration.S3Properties;
 import tds.content.services.ContentService;
 import tds.content.services.ItemXmlParser;
 import tds.itemrenderer.data.AccLookup;
@@ -107,4 +106,5 @@ public class ContentServiceImplTest {
         verify(mockItemDataService).readData(uri);
         assertThat(retDocument).isEqualTo(document);
     }
+
 }
