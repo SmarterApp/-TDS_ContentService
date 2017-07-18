@@ -11,22 +11,32 @@
  * and limitations under the license.
  **************************************************************************************************/
 
-package tds.content.services;
+package tds.content.configuration;
 
-import java.net.URI;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import tds.itemrenderer.data.ITSDocument;
+@Component
+@ConfigurationProperties(prefix = "tds")
+public class ContentServiceProperties {
+    public static final String ENCRYPTION_KEY_NAME = "EncryptionKey";
 
-/**
- * A service responsible for parsing the {@link tds.itemrenderer.data.ITSDocument} item document object
- */
-public interface ItemXmlParser {
-    /**
-     * Parses the item xml data at the {@link java.net.URI} provided
-     *
-     * @param uri The URI of the item metadata file
-     * @param itemData The stringified item xml data
-     * @return A mapped {@link tds.itemrenderer.data.ITSDocument} based on the fetched {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
-     */
-    ITSDocument parseItemDocument(final URI uri, final String itemData);
+    private boolean encryptionEnabled;
+    private String encryptionKey;
+
+    public boolean isEncryptionEnabled() {
+        return encryptionEnabled;
+    }
+
+    public void setEncryptionEnabled(final boolean encryptionEnabled) {
+        this.encryptionEnabled = encryptionEnabled;
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+
+    public void setEncryptionKey(final String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
 }

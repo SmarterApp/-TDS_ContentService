@@ -14,19 +14,23 @@
 package tds.content.services.impl;
 
 
+import TDS.Shared.Security.IEncryption;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.net.URI;
 
-import tds.content.configuration.S3Properties;
-import tds.content.services.ItemDocumentService;
+import tds.content.configuration.ContentServiceProperties;
+import tds.content.services.ContentService;
 import tds.content.services.ItemXmlParser;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.processing.ITSDocumentProcessingException;
+import tds.itemrenderer.processing.ItemDataService;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,49 +38,73 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ItemDocumentServiceImplTest {
-    private ItemDocumentService itemDocumentService;
+public class ContentServiceImplTest {
+    private ContentService contentService;
 
     @Mock
     private ItemXmlParser mockItemXmlParser;
 
     @Mock
-    private S3Properties mockS3Properties;
+    private ContentServiceProperties mockProperties;
+
+    @Mock
+    private ItemDataService mockItemDataService;
+
+    @Mock
+    private IEncryption mockEncryption;
 
     @Before
     public void setup() {
-        itemDocumentService = new ItemDocumentServiceImpl(mockItemXmlParser, mockS3Properties);
+        contentService = new ContentServiceImpl(mockItemXmlParser, mockItemDataService, mockEncryption, mockProperties);
     }
 
     @Test(expected = RuntimeException.class)
     public void shouldThrowOnInvalidatedDocument() {
         final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(false);
-        when(mockItemXmlParser.parseItemDocument(uri)).thenReturn(document);
-        itemDocumentService.loadItemDocument(uri, null);
+        when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
+        contentService.loadItemDocument(uri, null, null);
+    }
+
+    @Test(expected = ITSDocumentProcessingException.class)
+    public void shouldThrowOnIOException() throws IOException {
+        final URI uri = random(URI.class);
+        when(mockItemDataService.readData(uri)).thenThrow(IOException.class);
+        contentService.loadItemDocument(uri, null, null);
     }
 
     @Test
-    public void shouldLoadItemDocumentNullAccommodations() {
+    public void shouldLoadItemDocumentNullAccommodations() throws IOException {
         final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(true);
-        when(mockItemXmlParser.parseItemDocument(uri)).thenReturn(document);
-        ITSDocument retDocument = itemDocumentService.loadItemDocument(uri, null);
-        verify(mockItemXmlParser).parseItemDocument(uri);
+        when(mockItemDataService.readData(uri)).thenReturn(itemXml);
+        when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
+        ITSDocument retDocument = contentService.loadItemDocument(uri, null, null);
+        verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
+        verify(mockItemDataService).readData(uri);
         assertThat(retDocument).isEqualTo(document);
     }
 
     @Test
-    public void shouldLoadItemDocumenWithAccommodations() {
+    public void shouldLoadItemDocumentWithAccommodations() throws IOException {
         final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
+        final String contentUrl = random(String.class);
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(true);
         final AccLookup accLookup = random(AccLookup.class);
-        when(mockItemXmlParser.parseItemDocument(uri)).thenReturn(document);
-        ITSDocument retDocument = itemDocumentService.loadItemDocument(uri, accLookup);
-        verify(mockItemXmlParser).parseItemDocument(uri);
+        when(mockItemDataService.readData(uri)).thenReturn(itemXml);
+        when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
+
+        ITSDocument retDocument = contentService.loadItemDocument(uri, accLookup, contentUrl);
+
+        verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
+        verify(mockItemDataService).readData(uri);
         assertThat(retDocument).isEqualTo(document);
     }
+
 }

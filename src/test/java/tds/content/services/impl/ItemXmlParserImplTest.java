@@ -52,12 +52,13 @@ public class ItemXmlParserImplTest {
 
     @Before
     public void setup() {
-        itemXmlParser = new ItemXmlParserImpl(mockItemDataService, mockJaxbContext, Collections.EMPTY_LIST);
+        itemXmlParser = new ItemXmlParserImpl(mockJaxbContext, Collections.EMPTY_LIST);
     }
 
     @Test
     public void shouldParseItemDocument() throws JAXBException, IOException {
         final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
         final Itemrelease itemrelease = random(Itemrelease.class, "itemPassage");
         final Unmarshaller mockUnmarshaller = mock(Unmarshaller.class);
 
@@ -65,27 +66,16 @@ public class ItemXmlParserImplTest {
         when(mockUnmarshaller.unmarshal(isA(StringReader.class))).thenReturn(itemrelease);
         when(mockItemDataService.readData(uri)).thenReturn("Test");
 
-        final ITSDocument document = itemXmlParser.parseItemDocument(uri);
+        final ITSDocument document = itemXmlParser.parseItemDocument(uri, itemXml);
         assertThat(document).isNotNull();
     }
 
     @Test(expected = ITSDocumentProcessingException.class)
     public void shouldThrowITSDocumentProcessingExceptionForJaxBException() throws JAXBException {
         final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
         when(mockJaxbContext.createUnmarshaller()).thenThrow(JAXBException.class);
-        final ITSDocument document = itemXmlParser.parseItemDocument(uri);
+        final ITSDocument document = itemXmlParser.parseItemDocument(uri, itemXml);
         assertThat(document).isNotNull();
-    }
-
-    @Test(expected = ITSDocumentProcessingException.class)
-    public void shouldThrowITSDocumentProcessingExceptionForIOException() throws IOException, JAXBException {
-        final URI uri = random(URI.class);
-        final Itemrelease itemrelease = random(Itemrelease.class, "itemPassage");
-        final Unmarshaller mockUnmarshaller = mock(Unmarshaller.class);
-
-        when(mockJaxbContext.createUnmarshaller()).thenReturn(mockUnmarshaller);
-        when(mockUnmarshaller.unmarshal(isA(StringReader.class))).thenReturn(itemrelease);
-        when(mockItemDataService.readData(uri)).thenThrow(IOException.class);
-        itemXmlParser.parseItemDocument(uri);
     }
 }

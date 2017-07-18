@@ -14,9 +14,11 @@
 package tds.content.repositories.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +28,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+import tds.common.web.exceptions.NotFoundException;
 import tds.content.configuration.S3Properties;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -130,5 +135,22 @@ public class S3ItemDataRepositoryTest {
         final GetObjectRequest request = objectRequestArgumentCaptor.getValue();
         assertThat(request.getBucketName()).isEqualTo(scoringS3Properties.getBucketName());
         assertThat(request.getKey()).isEqualTo(scoringS3Properties.getItemPrefix() + itemDataPath);
+    }
+
+    @Test
+    public void shouldFindResource() throws Exception {
+        final String resourcePath = "items/my-Item/My-resource.xml";
+        final S3Object response = mock(S3Object.class);
+        when(response.getObjectContent()).thenReturn(response("Response Data"));
+        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenReturn(response);
+        InputStream retData = itemReader.findResource(resourcePath);
+        assertThat(IOUtils.toString(retData)).isEqualTo("Response Data");
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowIOException() throws Exception {
+        final String resourcePath = "items/my-Item/My-resource.xml";
+        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenThrow(AmazonS3Exception.class);
+        itemReader.findResource(resourcePath);
     }
 }

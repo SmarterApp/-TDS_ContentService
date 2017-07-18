@@ -13,6 +13,8 @@
 
 package tds.content.services;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import tds.itemrenderer.data.AccLookup;
@@ -21,13 +23,21 @@ import tds.itemrenderer.data.ITSDocument;
 /**
  * Handles loading the Item Documents for display
  */
-public interface ItemDocumentService {
-  /**
-   * Loads the {@link tds.itemrenderer.data.IITSDocument} representing item document
-   *
-   * @param uri            the URI to the document
-   * @param accommodations the {@link tds.itemrenderer.data.AccLookup} associated with the document
-   * @return {@link tds.itemrenderer.data.IITSDocument}
-   */
-  ITSDocument loadItemDocument(URI uri, AccLookup accommodations);
+public interface ContentService {
+    /**
+     * Loads the {@link tds.itemrenderer.data.IITSDocument} representing item document
+     *
+     * @param uri            the URI to the document
+     * @param accommodations the {@link tds.itemrenderer.data.AccLookup} associated with the document
+     * @return {@link tds.itemrenderer.data.IITSDocument}
+     */
+    ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath);
+
+    /**
+     * Loads the resource at the specified path
+     *
+     * @param resourcePath The path of the resource
+     * @return An {@link java.io.InputStream} of the resource data
+     */
+    InputStream loadResource(final URI resourcePath) throws IOException;
 }

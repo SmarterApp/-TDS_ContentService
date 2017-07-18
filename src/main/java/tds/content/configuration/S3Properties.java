@@ -26,7 +26,6 @@ public class S3Properties {
     private String secretKey;
     private String bucketName;
     private String itemPrefix;
-    private boolean encryptionEnabled;
 
     public String getAccessKey() {
         return accessKey;
@@ -58,13 +57,5 @@ public class S3Properties {
 
     public void setItemPrefix(final String itemPrefix) {
         this.itemPrefix = itemPrefix;
-    }
-
-    public boolean isEncryptionEnabled() {
-        return encryptionEnabled;
-    }
-
-    public void setEncryptionEnabled(final boolean encryptionEnabled) {
-        this.encryptionEnabled = encryptionEnabled;
     }
 }

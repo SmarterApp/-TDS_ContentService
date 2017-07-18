@@ -21,6 +21,10 @@ spring:
 tds:
   cache:
     enabled: false
+  encryption-enabled: true
+  encryption-key: Thisisanincrediblylongkeythatiscertainlylongerthantwentyfourcharacters
+  student-url: http://localhost:8888
+
 
 management:
   health:

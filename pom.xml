@@ -26,7 +26,7 @@
 		<assertj.version>3.4.1</assertj.version>
 		<mockito.version>1.10.19</mockito.version>
 		<tds-common.version>3.1.1.RELEASE</tds-common.version>
-		<item-renderer.version>3.1.2</item-renderer.version>
+		<item-renderer.version>3.1.5</item-renderer.version>
 		<item-scoring.version>3.1.1.RELEASE</item-scoring.version>
 	</properties>
 
@@ -134,7 +134,7 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.10</version>
 				<configuration>
-					<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+					<imageName>fwsbac/${project.artifactId}</imageName>
 					<imageTags>
 						<imageTag>${project.version}</imageTag>
 						<imageTag>latest</imageTag>
