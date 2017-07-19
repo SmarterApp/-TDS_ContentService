@@ -34,6 +34,7 @@ import java.net.URISyntaxException;
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 @RestController
 public class ContentController {
@@ -78,5 +79,25 @@ public class ContentController {
             .headers(headers)
 //            .contentLength(resource.contentLength())
             .body(resource);
+    }
+
+    @GetMapping(value = "/wordlist")
+    @ResponseBody
+    public ResponseEntity<Itemrelease> getWordListItem(@RequestParam final String itemPath) throws IOException {
+        try {
+            return ResponseEntity.ok(contentService.loadWordListItem(new URI(itemPath)));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        }
+    }
+
+    @GetMapping(value = "/loadData")
+    @ResponseBody
+    public ResponseEntity<String> getItemData(@RequestParam final String itemPath) throws IOException {
+        try {
+            return ResponseEntity.ok(contentService.loadData(new URI(itemPath)));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        }
     }
 }

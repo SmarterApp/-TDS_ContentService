@@ -17,6 +17,7 @@ import TDS.Shared.Security.IEncryption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -33,6 +34,7 @@ import tds.itemrenderer.data.AccProperties;
 import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 import tds.itemrenderer.processing.ITSDocumentProcessingException;
 import tds.itemrenderer.processing.ITSHtmlSanitizeTask;
 import tds.itemrenderer.processing.ITSProcessorApipTasks;
@@ -80,6 +82,11 @@ public class ContentServiceImpl implements ContentService {
         executeProcessing(itsDocument, accommodations, true, contextPath);
 
         return itsDocument;
+    }
+
+    @Override
+    public String loadData(final URI resourcePath) throws IOException {
+        return itemDataService.readData(resourcePath);
     }
 
     @Override
@@ -143,6 +150,16 @@ public class ContentServiceImpl implements ContentService {
             for (ITSAttachment attachment : content.getAttachments()) {
                 attachment.setUrl(resolver.resolveUrl(attachment.getFile()));
             }
+        }
+    }
+
+    @Override
+    public Itemrelease loadWordListItem(final URI uri) throws IOException {
+        final String itemData = itemDataService.readData(uri);
+        try {
+            return itemXmlParser.unmarshallWordListItem(itemData);
+        } catch (JAXBException e) {
+            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the word list \"%s\"", uri), e);
         }
     }
 }

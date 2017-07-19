@@ -19,6 +19,7 @@ import java.net.URI;
 
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 /**
  * Handles loading the Item Documents for display
@@ -39,5 +40,22 @@ public interface ContentService {
      * @param resourcePath The path of the resource
      * @return An {@link java.io.InputStream} of the resource data
      */
+    String loadData(final URI resourcePath) throws IOException;
+
+
+    /**
+     * Loads the resource at the specified path
+     *
+     * @param resourcePath The path of the resource
+     * @return An {@link java.io.InputStream} of the resource data
+     */
     InputStream loadResource(final URI resourcePath) throws IOException;
+
+    /**
+     * Loads the resource at the specified path
+     *
+     * @param resourcePath The path of the resource
+     * @return An {@link java.io.InputStream} of the resource data
+     */
+    Itemrelease loadWordListItem(final URI uri) throws IOException;
 }
