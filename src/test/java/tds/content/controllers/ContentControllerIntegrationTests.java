@@ -41,6 +41,7 @@ import tds.itemrenderer.data.ITSDocument;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -70,7 +71,7 @@ public class ContentControllerIntegrationTests {
         AccLookup accLookup = random(AccLookup.class);
 
         ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-        when(contentService.loadItemDocument(eq(uri), isA(AccLookup.class), anyString())).thenReturn(document);
+        when(contentService.loadItemDocument(eq(uri), isA(AccLookup.class), anyString(), anyBoolean())).thenReturn(document);
         URI restUri = UriComponentsBuilder.fromUriString("/item").build().toUri();
 
         MvcResult result = http.perform(post(restUri)

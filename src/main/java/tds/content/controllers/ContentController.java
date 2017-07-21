@@ -48,11 +48,12 @@ public class ContentController {
     @PostMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam(required = false) final String contextPath,
+                                                       @RequestParam(required = false) final boolean swapAudioFormat,
                                                        @RequestBody final AccLookup accLookup) {
         ITSDocument itemDocument;
 
         try {
-            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath);
+            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath, swapAudioFormat);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }

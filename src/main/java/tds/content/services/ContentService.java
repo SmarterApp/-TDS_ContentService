@@ -32,7 +32,7 @@ public interface ContentService {
      * @param accommodations the {@link tds.itemrenderer.data.AccLookup} associated with the document
      * @return {@link tds.itemrenderer.data.IITSDocument}
      */
-    ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath);
+    ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean swapAudioFormat);
 
     /**
      * Loads the resource at the specified path

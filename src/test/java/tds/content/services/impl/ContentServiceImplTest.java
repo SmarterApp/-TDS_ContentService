@@ -65,14 +65,14 @@ public class ContentServiceImplTest {
         final ITSDocument document = random(ITSDocument.class);
         document.setValidated(false);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
-        contentService.loadItemDocument(uri, null, null);
+        contentService.loadItemDocument(uri, null, null, false);
     }
 
     @Test(expected = ITSDocumentProcessingException.class)
     public void shouldThrowOnIOException() throws IOException {
         final URI uri = random(URI.class);
         when(mockItemDataService.readData(uri)).thenThrow(IOException.class);
-        contentService.loadItemDocument(uri, null, null);
+        contentService.loadItemDocument(uri, null, null, false);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ContentServiceImplTest {
         document.setValidated(true);
         when(mockItemDataService.readData(uri)).thenReturn(itemXml);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
-        ITSDocument retDocument = contentService.loadItemDocument(uri, null, null);
+        ITSDocument retDocument = contentService.loadItemDocument(uri, null, null, false);
         verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
         verify(mockItemDataService).readData(uri);
         assertThat(retDocument).isEqualTo(document);
@@ -100,7 +100,7 @@ public class ContentServiceImplTest {
         when(mockItemDataService.readData(uri)).thenReturn(itemXml);
         when(mockItemXmlParser.parseItemDocument(uri, itemXml)).thenReturn(document);
 
-        ITSDocument retDocument = contentService.loadItemDocument(uri, accLookup, contentUrl);
+        ITSDocument retDocument = contentService.loadItemDocument(uri, accLookup, contentUrl, false);
 
         verify(mockItemXmlParser).parseItemDocument(uri, itemXml);
         verify(mockItemDataService).readData(uri);

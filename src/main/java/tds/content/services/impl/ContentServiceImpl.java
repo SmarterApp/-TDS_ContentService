@@ -62,7 +62,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath) {
+    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean swapAudioFormat) {
         final String itemDataXml;
 
         try {
@@ -79,7 +79,7 @@ public class ContentServiceImpl implements ContentService {
         }
 
         // run any processing
-        executeProcessing(itsDocument, accommodations, true, contextPath);
+        executeProcessing(itsDocument, accommodations, true, contextPath, swapAudioFormat);
 
         return itsDocument;
     }
@@ -94,7 +94,7 @@ public class ContentServiceImpl implements ContentService {
         return itemDataService.readResourceData(resourcePath);
     }
 
-    private void executeProcessing(ITSDocument itsDocument, AccLookup accommodations, boolean resolveUrls, String contextPath) {
+    private void executeProcessing(ITSDocument itsDocument, AccLookup accommodations, boolean resolveUrls, String contextPath, boolean swapAudioFormat) {
         // check if there are accommodations
         if (accommodations == null || accommodations == AccLookup.getNone())
             return;
@@ -136,7 +136,7 @@ public class ContentServiceImpl implements ContentService {
 
         // add task for URL's
         if (resolveUrls && apipMode != APIPMode.BRF) {
-            processorTasks.registerTask(new ITSUrlTask(properties.isEncryptionEnabled(), contextPath, encryption));
+            processorTasks.registerTask(new ITSUrlTask(properties.isEncryptionEnabled(), contextPath, encryption, swapAudioFormat));
         }
 
         // add task to sanitize the html output to fix up any undesirable artifacts in the items coming from ITS
