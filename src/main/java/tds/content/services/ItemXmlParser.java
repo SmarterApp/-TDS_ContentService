@@ -32,5 +32,11 @@ public interface ItemXmlParser {
      */
     ITSDocument parseItemDocument(final URI uri, final String itemData);
 
+    /**
+     * Parses the word list item xml data
+     *
+     * @param itemData The stringified item xml data
+     * @return An unmarshalled {@link tds.itemrenderer.data.xml.wordlist.Itemrelease}
+     */
     Itemrelease unmarshallWordListItem(final String itemData) throws JAXBException;
 }
