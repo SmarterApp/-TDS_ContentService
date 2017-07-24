@@ -52,7 +52,7 @@ public class ItemXmlParserImplTest {
 
     @Before
     public void setup() {
-        itemXmlParser = new ItemXmlParserImpl(mockJaxbContext, Collections.EMPTY_LIST);
+        itemXmlParser = new ItemXmlParserImpl(mockJaxbContext, mockJaxbContext, Collections.EMPTY_LIST);
     }
 
     @Test
@@ -68,6 +68,22 @@ public class ItemXmlParserImplTest {
 
         final ITSDocument document = itemXmlParser.parseItemDocument(uri, itemXml);
         assertThat(document).isNotNull();
+    }
+
+
+    @Test
+    public void shouldParseWordListItem() throws JAXBException, IOException {
+        final URI uri = random(URI.class);
+        final String itemXml = random(String.class);
+        final tds.itemrenderer.data.xml.wordlist.Itemrelease itemrelease = random(tds.itemrenderer.data.xml.wordlist.Itemrelease.class, "itemPassage");
+        final Unmarshaller mockUnmarshaller = mock(Unmarshaller.class);
+
+        when(mockJaxbContext.createUnmarshaller()).thenReturn(mockUnmarshaller);
+        when(mockUnmarshaller.unmarshal(isA(StringReader.class))).thenReturn(itemrelease);
+        when(mockItemDataService.readData(uri)).thenReturn("Test");
+
+        final tds.itemrenderer.data.xml.wordlist.Itemrelease wordListItem = itemXmlParser.unmarshallWordListItem(itemXml);
+        assertThat(wordListItem).isNotNull();
     }
 
     @Test(expected = ITSDocumentProcessingException.class)

@@ -30,10 +30,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 @RestController
 public class ContentController {
@@ -47,11 +49,12 @@ public class ContentController {
     @PostMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam(required = false) final String contextPath,
+                                                       @RequestParam(required = false) final boolean oggAudioSupport,
                                                        @RequestBody final AccLookup accLookup) {
         ITSDocument itemDocument;
 
         try {
-            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath);
+            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath, oggAudioSupport);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
@@ -77,5 +80,27 @@ public class ContentController {
         return ResponseEntity.ok()
             .headers(headers)
             .body(resource);
+    }
+
+    @GetMapping(value = "/wordlist")
+    @ResponseBody
+    public ResponseEntity<Itemrelease> getWordListItem(@RequestParam final String itemPath,
+                                                       @RequestParam final String contextPath,
+                                                       @RequestParam final boolean oggAudioSupport) throws IOException {
+        try {
+            return ResponseEntity.ok(contentService.loadWordListItem(new URI(itemPath), contextPath, oggAudioSupport));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        }
+    }
+
+    @GetMapping(value = "/loadData")
+    @ResponseBody
+    public ResponseEntity<String> getItemData(@RequestParam final String itemPath) throws IOException {
+        try {
+            return ResponseEntity.ok(contentService.loadData(new URI(itemPath)));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        }
     }
 }

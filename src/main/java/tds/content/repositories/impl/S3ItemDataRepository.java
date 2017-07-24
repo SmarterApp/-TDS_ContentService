@@ -85,6 +85,12 @@ public class S3ItemDataRepository implements ItemDataRepository {
         }
     }
 
+    @Override
+    public boolean doesItemExists(final String itemDataPath) throws IOException {
+        final String itemLocation = s3Properties.getItemPrefix() + buildPath(itemDataPath);
+        return s3Client.doesObjectExist(s3Properties.getBucketName(), itemLocation);
+    }
+
     /**
      * This is a path trimmer that reduces resource paths from something like:
      * /usr/local/tomcat/resources/tds/bank/items/Item-187-2501/item-187-2501.xml

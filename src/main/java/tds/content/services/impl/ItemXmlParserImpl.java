@@ -14,6 +14,7 @@
 package tds.content.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -37,12 +38,14 @@ import tds.itemrenderer.processing.ItemDataService;
 public class ItemXmlParserImpl implements ItemXmlParser {
     public static final String UTF8_BOM = "\uFEFF";
     private final JAXBContext jaxbContext;
+    private final JAXBContext wordListJaxbContext;
     private final Collection<ItemDocumentMapper> itsMappers;
 
     @Autowired
-    public ItemXmlParserImpl(final JAXBContext jaxbContext,
+    public ItemXmlParserImpl(final JAXBContext jaxbContext, @Qualifier("wordListJaxbContext") final JAXBContext wordListJaxbContext,
                              final Collection<ItemDocumentMapper> itsMappers) {
         this.jaxbContext = jaxbContext;
+        this.wordListJaxbContext = wordListJaxbContext;
         this.itsMappers = itsMappers;
     }
 
@@ -51,6 +54,14 @@ public class ItemXmlParserImpl implements ItemXmlParser {
     public ITSDocument parseItemDocument(final URI itemPath, final String itemData) {
         Itemrelease itemXml = unmarshallItemXml(itemPath, itemData);
         return mapItemReleaseToDocument(itemPath, itemXml);
+    }
+
+    @Override
+    @Cacheable(CacheType.LONG_TERM)
+    public tds.itemrenderer.data.xml.wordlist.Itemrelease unmarshallWordListItem(final String itemData) throws JAXBException {
+        final Unmarshaller jaxbUnmarshaller = wordListJaxbContext.createUnmarshaller();
+        final StringReader reader = removeBomIfPresent(itemData);
+        return (tds.itemrenderer.data.xml.wordlist.Itemrelease) jaxbUnmarshaller.unmarshal(reader);
     }
 
     private ITSDocument mapItemReleaseToDocument(final URI itemPath, final Itemrelease itemXml) {

@@ -13,9 +13,11 @@
 
 package tds.content.services;
 
+import javax.xml.bind.JAXBException;
 import java.net.URI;
 
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 /**
  * A service responsible for parsing the {@link tds.itemrenderer.data.ITSDocument} item document object
@@ -29,4 +31,12 @@ public interface ItemXmlParser {
      * @return A mapped {@link tds.itemrenderer.data.ITSDocument} based on the fetched {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
      */
     ITSDocument parseItemDocument(final URI uri, final String itemData);
+
+    /**
+     * Parses the word list item xml data
+     *
+     * @param itemData The stringified item xml data
+     * @return An unmarshalled {@link tds.itemrenderer.data.xml.wordlist.Itemrelease}
+     */
+    Itemrelease unmarshallWordListItem(final String itemData) throws JAXBException;
 }

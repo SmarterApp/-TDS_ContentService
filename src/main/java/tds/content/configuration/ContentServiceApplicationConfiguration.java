@@ -54,6 +54,14 @@ public class ContentServiceApplicationConfiguration {
         return contextObj;
     }
 
+    @Bean(name = "wordListJaxbContext")
+    public JAXBContext wordListJaxbContext() throws JAXBException {
+        JAXBContext contextObj = JAXBContext.newInstance(tds.itemrenderer.data.xml.wordlist.Itemrelease.class);
+        Marshaller marshallerObj = contextObj.createMarshaller();
+        marshallerObj.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        return contextObj;
+    }
+
     @Bean
     public Marshaller jaxbMarshaller(final JAXBContext jaxbContext) throws JAXBException {
         return jaxbContext.createMarshaller();
