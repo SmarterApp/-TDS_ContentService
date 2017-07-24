@@ -21,6 +21,7 @@ import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
@@ -72,9 +73,11 @@ public class S3ItemDataRepository implements ItemDataRepository {
             return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {
             if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                throw new NotFoundException(String.format("Could not find resource at resource location %s", resourcePath));
+                throw new NotFoundException(String.format("Could not find resource at resource location %s", resourceLocation));
+            } else if (ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                throw new AccessDeniedException(String.format("Could not access the resource at resource location %s", resourceLocation));
             }
-            throw new IOException("Unable to read S3 item: " + resourceLocation, ex);
+            throw ex;
         }
     }
 

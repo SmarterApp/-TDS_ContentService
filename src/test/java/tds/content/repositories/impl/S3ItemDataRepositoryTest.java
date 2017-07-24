@@ -19,6 +19,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -145,6 +147,15 @@ public class S3ItemDataRepositoryTest {
         when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenReturn(response);
         InputStream retData = itemReader.findResource(resourcePath);
         assertThat(IOUtils.toString(retData)).isEqualTo("Response Data");
+    }
+
+    @Test(expected = AccessDeniedException.class)
+    public void shouldThrowAccessDenidFor403() throws Exception {
+        final String resourcePath = "items/my-Item/My-resource.xml";
+        AmazonS3Exception exception = new AmazonS3Exception("Exception");
+        exception.setStatusCode(HttpStatus.SC_FORBIDDEN);
+        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenThrow(exception);
+        itemReader.findResource(resourcePath);
     }
 
     @Test(expected = IOException.class)
