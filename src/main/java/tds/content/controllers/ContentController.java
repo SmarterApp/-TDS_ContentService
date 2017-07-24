@@ -79,7 +79,6 @@ public class ContentController {
 
         return ResponseEntity.ok()
             .headers(headers)
-//            .contentLength(resource.contentLength())
             .body(resource);
     }
 
