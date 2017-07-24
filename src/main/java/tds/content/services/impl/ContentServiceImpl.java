@@ -14,15 +14,20 @@
 package tds.content.services.impl;
 
 import TDS.Shared.Security.IEncryption;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,6 +59,8 @@ import tds.itemrenderer.processing.ItemDataService;
 
 @Service
 public class ContentServiceImpl implements ContentService {
+    private static final Logger logger = LoggerFactory.getLogger(ContentService.class);
+
     private final ItemXmlParser itemXmlParser;
     private final ItemDataService itemDataService;
     private final ContentServiceProperties properties;
@@ -145,11 +152,7 @@ public class ContentServiceImpl implements ContentService {
         final ITSUrlResolver2 resolver2 = new ITSUrlResolver2(itsDocument.getBaseUri(), properties.isEncryptionEnabled(), contextPath, encryption) {
             @Override
             protected String audioSwapHack(String fileName) {
-                if (!oggAudioSupport) {
-                    // TODO: detect existence of new file
-                    return audioFileNameSwap(fileName);
-                }
-                return super.audioSwapHack(fileName);
+                return audioSwap(this._filePath, fileName, oggAudioSupport);
             }
         };
 
@@ -192,6 +195,7 @@ public class ContentServiceImpl implements ContentService {
      * replaces links to the web application that will serve resources
      */
     private void processWordList(final Itemrelease itemrelease, final String baseUri, final String contextPath, final boolean oggAudioSupport) {
+        // replace urls in the nested HTML member of Itemrelease object
         final Stream<Keyword> keywords = itemrelease.getItem().getKeywordList().getKeyword().stream();
         keywords
             .filter(keyword -> StringUtils.isBlank(keyword.getIndex()))
@@ -202,16 +206,7 @@ public class ContentServiceImpl implements ContentService {
                 final ITSUrlResolver2 resolver = new ITSUrlResolver2(baseUri, properties.isEncryptionEnabled(), contextPath, encryption) {
                     @Override
                     protected String audioSwapHack(String fileName) {
-                        if (!oggAudioSupport) {
-                            // the user's browser does not support ogg audio files
-                            // try and replace ogg file with m4a file if it exists
-                            final String audioFile = audioFileNameSwap(fileName);
-
-                            // TODO: test existence of m4a file
-
-                            return audioFile;
-                        }
-                        return fileName;
+                        return audioSwap(this._filePath, fileName, oggAudioSupport);
                     }
                 };
                 final String content = resolver.resolveResourceUrls(html.getContent());
@@ -233,5 +228,28 @@ public class ContentServiceImpl implements ContentService {
             }
         }
         return false;
+    }
+
+    // if the vorbis-ogg file format is not supported by the browser,
+    // try to locate and use an m4a version of the audio file
+    protected String audioSwap(final String filePath, final String fileName, final boolean oggAudioSupport) {
+        if (!oggAudioSupport) {
+            // filename with new extension
+            final String newAudioFileName = FilenameUtils.removeExtension(fileName) + ".m4a";
+            // current directory of ogg file
+            final File newAudioFileDirectory = Paths.get(filePath).getParent().toFile();
+            // full path of the audio file with the new m4a extension
+            final String newAudioFile = new File(newAudioFileDirectory, newAudioFileName).toString();
+            try {
+                // only return the alternative file if it exists, otherwise return the original file
+                if (itemDataService.dataExists(URI.create(newAudioFile))) {
+                    return newAudioFileName;
+                }
+            } catch (IOException e) {
+                logger.error(String.format("Exception occurred while testing existence of alternate audio file format. " +
+                    "Original file: %s alternate file: %s", fileName, newAudioFileName), e);
+            }
+        }
+        return fileName;
     }
 }

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Optional;
 
 import tds.common.web.exceptions.NotFoundException;
@@ -76,6 +77,12 @@ public class S3ItemDataRepository implements ItemDataRepository {
             }
             throw new IOException("Unable to read S3 item: " + resourceLocation, ex);
         }
+    }
+
+    @Override
+    public boolean doesItemExists(final String itemDataPath) throws IOException {
+        final String itemLocation = s3Properties.getItemPrefix() + buildPath(itemDataPath);
+        return s3Client.doesObjectExist(s3Properties.getBucketName(), itemLocation);
     }
 
     /**

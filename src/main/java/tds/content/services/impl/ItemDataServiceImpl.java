@@ -45,4 +45,9 @@ public class ItemDataServiceImpl implements ItemDataService {
     public InputStream readResourceData(final URI uri) throws IOException {
         return itemDataRepository.findResource(uri.toASCIIString());
     }
+
+    @Override
+    public boolean dataExists(URI uri) throws IOException {
+        return itemDataRepository.doesItemExists(uri.toASCIIString());
+    }
 }
