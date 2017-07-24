@@ -14,14 +14,21 @@
 package tds.content.services.impl;
 
 import TDS.Shared.Security.IEncryption;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import tds.common.cache.CacheType;
 import tds.content.configuration.ContentServiceProperties;
 import tds.content.services.ContentService;
 import tds.content.services.ItemXmlParser;
@@ -35,11 +42,13 @@ import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
+import tds.itemrenderer.data.xml.wordlist.Keyword;
 import tds.itemrenderer.processing.ITSDocumentProcessingException;
 import tds.itemrenderer.processing.ITSHtmlSanitizeTask;
 import tds.itemrenderer.processing.ITSProcessorApipTasks;
 import tds.itemrenderer.processing.ITSProcessorTasks;
 import tds.itemrenderer.processing.ITSUrlResolver;
+import tds.itemrenderer.processing.ITSUrlResolver2;
 import tds.itemrenderer.processing.ITSUrlTask;
 import tds.itemrenderer.processing.ItemDataService;
 
@@ -62,7 +71,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean swapAudioFormat) {
+    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport) {
         final String itemDataXml;
 
         try {
@@ -79,12 +88,13 @@ public class ContentServiceImpl implements ContentService {
         }
 
         // run any processing
-        executeProcessing(itsDocument, accommodations, true, contextPath, swapAudioFormat);
+        executeProcessing(itsDocument, accommodations, true, contextPath, oggAudioSupport);
 
         return itsDocument;
     }
 
     @Override
+    @Cacheable(CacheType.LONG_TERM)
     public String loadData(final URI resourcePath) throws IOException {
         return itemDataService.readData(resourcePath);
     }
@@ -94,7 +104,7 @@ public class ContentServiceImpl implements ContentService {
         return itemDataService.readResourceData(resourcePath);
     }
 
-    private void executeProcessing(ITSDocument itsDocument, AccLookup accommodations, boolean resolveUrls, String contextPath, boolean swapAudioFormat) {
+    private void executeProcessing(ITSDocument itsDocument, AccLookup accommodations, boolean resolveUrls, String contextPath, boolean oggAudioSupport) {
         // check if there are accommodations
         if (accommodations == null || accommodations == AccLookup.getNone())
             return;
@@ -132,11 +142,20 @@ public class ContentServiceImpl implements ContentService {
             processorTasks.registerTask(apipTasks);
         }
 
-        ITSUrlResolver resolver = new ITSUrlResolver(itsDocument.getBaseUri(), properties.isEncryptionEnabled(), contextPath, encryption);
+        final ITSUrlResolver2 resolver2 = new ITSUrlResolver2(itsDocument.getBaseUri(), properties.isEncryptionEnabled(), contextPath, encryption) {
+            @Override
+            protected String audioSwapHack(String fileName) {
+                if (!oggAudioSupport) {
+                    // TODO: detect existence of new file
+                    return audioFileNameSwap(fileName);
+                }
+                return super.audioSwapHack(fileName);
+            }
+        };
 
         // add task for URL's
         if (resolveUrls && apipMode != APIPMode.BRF) {
-            processorTasks.registerTask(new ITSUrlTask(properties.isEncryptionEnabled(), contextPath, encryption, swapAudioFormat));
+            processorTasks.registerTask(new ITSUrlTask(resolver2));
         }
 
         // add task to sanitize the html output to fix up any undesirable artifacts in the items coming from ITS
@@ -147,6 +166,7 @@ public class ContentServiceImpl implements ContentService {
 
         // resolve attachment url's
         if (content != null && content.getAttachments() != null && content.getAttachments().size() > 0) {
+            final ITSUrlResolver resolver = new ITSUrlResolver(itsDocument.getBaseUri(), properties.isEncryptionEnabled(), contextPath, encryption);
             for (ITSAttachment attachment : content.getAttachments()) {
                 attachment.setUrl(resolver.resolveUrl(attachment.getFile()));
             }
@@ -154,12 +174,64 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public Itemrelease loadWordListItem(final URI uri) throws IOException {
+    public Itemrelease loadWordListItem(final URI uri, final String contextPath, final boolean oggAudioSupport) throws IOException {
         final String itemData = itemDataService.readData(uri);
+        final Itemrelease wordList;
         try {
-            return itemXmlParser.unmarshallWordListItem(itemData);
+            wordList = itemXmlParser.unmarshallWordListItem(itemData);
         } catch (JAXBException e) {
             throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the word list \"%s\"", uri), e);
         }
+
+        processWordList(wordList, uri.toASCIIString(), contextPath, oggAudioSupport);
+
+        return wordList;
+    }
+
+    /**
+     * replaces links to the web application that will serve resources
+     */
+    private void processWordList(final Itemrelease itemrelease, final String baseUri, final String contextPath, final boolean oggAudioSupport) {
+        final Stream<Keyword> keywords = itemrelease.getItem().getKeywordList().getKeyword().stream();
+        keywords
+            .filter(keyword -> StringUtils.isBlank(keyword.getIndex()))
+            .map(Keyword::getHtml)
+            .flatMap(List::stream)
+            .filter(html -> StringUtils.isBlank(html.getListType()) || StringUtils.isBlank(html.getListCode()) || isBlankHtmlContent(html.getContent()))
+            .forEach(html -> {
+                final ITSUrlResolver2 resolver = new ITSUrlResolver2(baseUri, properties.isEncryptionEnabled(), contextPath, encryption) {
+                    @Override
+                    protected String audioSwapHack(String fileName) {
+                        if (!oggAudioSupport) {
+                            // the user's browser does not support ogg audio files
+                            // try and replace ogg file with m4a file if it exists
+                            final String audioFile = audioFileNameSwap(fileName);
+
+                            // TODO: test existence of m4a file
+
+                            return audioFile;
+                        }
+                        return fileName;
+                    }
+                };
+                final String content = resolver.resolveResourceUrls(html.getContent());
+                html.setContent(content);
+            });
+    }
+
+    private static Pattern pattern = Pattern.compile("^<p[^>]*>(.+?)</p>$");
+
+    private boolean isBlankHtmlContent(String htmlContent) {
+        if (StringUtils.isBlank (htmlContent)) {
+            return true;
+        }
+        final Matcher matcher = pattern.matcher(htmlContent.trim());
+        while (matcher.find()) {
+            final String tagContent = matcher.group(1).trim();
+            if (tagContent.equals("") || tagContent.equals("&#xA0;")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

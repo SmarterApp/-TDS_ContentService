@@ -16,6 +16,7 @@ package tds.content.services;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
@@ -28,11 +29,13 @@ public interface ContentService {
     /**
      * Loads the {@link tds.itemrenderer.data.IITSDocument} representing item document
      *
-     * @param uri            the URI to the document
-     * @param accommodations the {@link tds.itemrenderer.data.AccLookup} associated with the document
+     * @param uri             the URI to the document
+     * @param accommodations  the {@link tds.itemrenderer.data.AccLookup} associated with the document
+     * @param contextPath     the context path of the web application that will serve the resources linked to by the its document
+     * @param oggAudioSupport does browser support exists for the ogg-vorbis audio format
      * @return {@link tds.itemrenderer.data.IITSDocument}
      */
-    ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean swapAudioFormat);
+    ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport);
 
     /**
      * Loads the resource at the specified path
@@ -52,10 +55,12 @@ public interface ContentService {
     InputStream loadResource(final URI resourcePath) throws IOException;
 
     /**
-     * Loads the resource at the specified path
+     * Load the word list at the specific path
      *
-     * @param resourcePath The path of the resource
-     * @return An {@link java.io.InputStream} of the resource data
+     * @param uri             the URI to the wordlist
+     * @param contextPath     the context path of the web application that will serve the resources linked to by the its document
+     * @param oggAudioSupport does browser support exists for the ogg-vorbis audio format
+     * @return An {@link tds.itemrenderer.data.xml.wordlist.Itemrelease} of the word list with its relative links processed
      */
-    Itemrelease loadWordListItem(final URI uri) throws IOException;
+    Itemrelease loadWordListItem(final URI uri, final String contextPath, final boolean oggAudioSupport) throws IOException;
 }

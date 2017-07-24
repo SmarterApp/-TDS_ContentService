@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
@@ -48,12 +49,12 @@ public class ContentController {
     @PostMapping(value = "/item", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam(required = false) final String contextPath,
-                                                       @RequestParam(required = false) final boolean swapAudioFormat,
+                                                       @RequestParam(required = false) final boolean oggAudioSupport,
                                                        @RequestBody final AccLookup accLookup) {
         ITSDocument itemDocument;
 
         try {
-            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath, swapAudioFormat);
+            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath, oggAudioSupport);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
@@ -84,9 +85,11 @@ public class ContentController {
 
     @GetMapping(value = "/wordlist")
     @ResponseBody
-    public ResponseEntity<Itemrelease> getWordListItem(@RequestParam final String itemPath) throws IOException {
+    public ResponseEntity<Itemrelease> getWordListItem(@RequestParam final String itemPath,
+                                                       @RequestParam final String contextPath,
+                                                       @RequestParam final boolean oggAudioSupport) throws IOException {
         try {
-            return ResponseEntity.ok(contentService.loadWordListItem(new URI(itemPath)));
+            return ResponseEntity.ok(contentService.loadWordListItem(new URI(itemPath), contextPath, oggAudioSupport));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
