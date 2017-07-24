@@ -158,10 +158,12 @@ public class S3ItemDataRepositoryTest {
         itemReader.findResource(resourcePath);
     }
 
-    @Test(expected = IOException.class)
-    public void shouldThrowIOException() throws Exception {
+    @Test(expected = NotFoundException.class)
+    public void shouldThrowNotFoundException() throws Exception {
         final String resourcePath = "items/my-Item/My-resource.xml";
-        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenThrow(AmazonS3Exception.class);
+        AmazonS3Exception exception = new AmazonS3Exception("Exception");
+        exception.setStatusCode(HttpStatus.SC_NOT_FOUND);
+        when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenThrow(exception);
         itemReader.findResource(resourcePath);
     }
 }
