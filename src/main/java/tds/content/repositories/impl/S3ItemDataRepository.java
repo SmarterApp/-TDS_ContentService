@@ -20,13 +20,15 @@ import com.amazonaws.services.s3.model.S3Object;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
 import tds.common.web.exceptions.NotFoundException;
 import tds.content.configuration.S3Properties;
@@ -38,6 +40,7 @@ import static org.apache.commons.io.FilenameUtils.normalize;
 @Repository
 @Primary
 public class S3ItemDataRepository implements ItemDataRepository {
+    private final Logger log = LoggerFactory.getLogger(S3ItemDataRepository.class);
     private final AmazonS3 s3Client;
     private final S3Properties s3Properties;
 
@@ -72,9 +75,13 @@ public class S3ItemDataRepository implements ItemDataRepository {
             return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {
             if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                throw new NotFoundException(String.format("Could not find resource at resource location %s", resourcePath));
+                log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", resourceLocation);
+                throw new NotFoundException(String.format("Could not find resource at resource location %s", resourceLocation));
+            } else if (ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                log.warn("AmazonS3Exception thrown with a status of \"Forbidden\" for path {}.", resourceLocation);
+                throw new AccessDeniedException(String.format("Could not access the resource at resource location %s", resourceLocation));
             }
-            throw new IOException("Unable to read S3 item: " + resourceLocation, ex);
+            throw ex;
         }
     }
 
