@@ -1,11 +1,15 @@
 package tds.content.mappers;
 
 import AIR.Common.Utilities.Path;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +50,11 @@ public class UrlResolverTest {
         final ITSUrlResolver resolver = new ITSUrlResolver2("path/file.ext", false, "/contextPath", null) {
             @Override
             protected String audioSwapHack(String fileName) {
-                return audioFileNameSwap(fileName);
+                // filename with new extension
+                return FilenameUtils.removeExtension(fileName) + ".m4a";
             }
         };
         final String content = resolver.resolveResourceUrls(document.getContents().get(0).getStem());
         assertEquals(content, "<p style=\"font-weight:bold; \">Water in <span id=\"passage_3716_TAG_1_BEGIN\">Space</span></p><p style=\"\">&#xA0;</p><p style=\"\">Listen to the presentation. Then answer the questions.</p><p style=\"\">&#xA0;</p><p style=\"\"><a href=\"/contextPath/Pages/API/Resources.axd?path=path%2F&amp;file=passage_3716_v7_3716_audio.m4a\" type=\"audio/ogg\" class=\"sound_explicit\" autoplay=\"False\" visible=\"True\"></a></p><p style=\"\">&#xA0;</p><p style=\"\">“Water in <span id=\"passage_3716_TAG_3_BEGIN\">Space”</span> by NASA, from <span id=\"passage_3716_TAG_2_BEGIN\">http://www.nasa.gov/mov/178680main_028_ksnn_3-5_water_cap.mov</span><span id=\"passage_3716_TAG_4_BEGIN\">.</span> In the public domain.</p>");
     }
 }
-
