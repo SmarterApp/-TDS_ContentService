@@ -13,7 +13,7 @@
 
 package tds.content.controllers;
 
-import com.esotericsoftware.kryo.io.Input;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Test;
@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
@@ -46,8 +46,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -100,5 +100,31 @@ public class ContentControllerIntegrationTests {
             .andReturn();
 
         assertThat(result.getResponse().getContentAsString()).isEqualTo("Hello");
+    }
+
+    @Test
+    public void shouldReturn404ForNoResourceFound() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        AmazonS3Exception notFoundException = new AmazonS3Exception("Not Found");
+        notFoundException.setStatusCode(HttpStatus.NOT_FOUND.value());
+        when(contentService.loadResource(uri)).thenThrow(notFoundException);
+        URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
+
+        http.perform(get(restUri)
+            .param("resourcePath", uri.toString()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturn403ForAccessDenied() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        AmazonS3Exception acessDeniedException = new AmazonS3Exception("Access Denied");
+        acessDeniedException.setStatusCode(HttpStatus.FORBIDDEN.value());
+        when(contentService.loadResource(uri)).thenThrow(acessDeniedException);
+        URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
+
+        http.perform(get(restUri)
+            .param("resourcePath", uri.toString()))
+            .andExpect(status().isForbidden());
     }
 }

@@ -13,10 +13,11 @@
 
 package tds.content.controllers;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
@@ -64,13 +64,20 @@ public class ContentController {
 
     @GetMapping(value = "/resource")
     @ResponseBody
-    public ResponseEntity<Resource> getResource(@RequestParam final String resourcePath) throws IOException {
+    public ResponseEntity<?> getResource(@RequestParam final String resourcePath) throws IOException {
         InputStream inputStream;
 
         try {
             inputStream = contentService.loadResource(new URI(resourcePath));
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided resource path '%s' was malformed", resourcePath));
+        } catch (final AmazonS3Exception ex) {
+            if (ex.getStatusCode() == org.apache.http.HttpStatus.SC_NOT_FOUND) {
+                return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            } else if (ex.getStatusCode() == org.apache.http.HttpStatus.SC_FORBIDDEN) {
+                return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+            }
+            throw ex;
         }
 
         final HttpHeaders headers = new HttpHeaders();
