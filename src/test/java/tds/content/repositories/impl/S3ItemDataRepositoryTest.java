@@ -100,7 +100,7 @@ public class S3ItemDataRepositoryTest {
         when(response.getObjectContent()).thenReturn(response("Response Data"));
 
         when(mockAmazonS3.getObject(any(GetObjectRequest.class))).thenReturn(response);
-
+        itemReader.findOne(longPath);
         final ArgumentCaptor<GetObjectRequest> objectRequestArgumentCaptor = ArgumentCaptor.forClass(GetObjectRequest.class);
         verify(mockAmazonS3).getObject(objectRequestArgumentCaptor.capture());
 
