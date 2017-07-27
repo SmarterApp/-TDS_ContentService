@@ -78,6 +78,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    @Cacheable(CacheType.LONG_TERM)
     public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport) {
         final String itemDataXml;
 
