@@ -178,8 +178,9 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    @Cacheable(CacheType.LONG_TERM)
     public Itemrelease loadWordListItem(final URI uri, final String contextPath, final boolean oggAudioSupport) throws IOException {
-        final String itemData = itemDataService.readData(uri);
+        final String itemData = loadData(uri);
         final Itemrelease wordList;
         try {
             wordList = itemXmlParser.unmarshallWordListItem(itemData);
