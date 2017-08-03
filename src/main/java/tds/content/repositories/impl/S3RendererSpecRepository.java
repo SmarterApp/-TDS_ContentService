@@ -19,6 +19,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 @Repository
 @Primary
+@Profile("s3Content")
 public class S3RendererSpecRepository implements RendererSpecRepository {
 
     private final AmazonS3 s3Client;
