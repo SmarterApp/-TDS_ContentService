@@ -96,7 +96,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
      * /usr/local/tomcat/resources/tds/bank/items/Item-187-2501/item-187-2501.xml
      * to
      * items/Item-187-2501/item-187-2501.xml
-     *AAssessment
+     *
      * @param itemDataPath The item resource path
      * @return The resource path relative to our S3 bucket and prefix
      */
