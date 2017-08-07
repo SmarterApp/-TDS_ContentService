@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -78,6 +79,8 @@ public class ContentController {
                 return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
             }
             throw ex;
+        } catch (final FileNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
 
         final HttpHeaders headers = new HttpHeaders();

@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -103,11 +104,22 @@ public class ContentControllerIntegrationTests {
     }
 
     @Test
-    public void shouldReturn404ForNoResourceFound() throws Exception {
+    public void shouldReturn404ForNoResourceFoundAmazonS3Exception() throws Exception {
         URI uri = new URI("/path/to/item.xml");
         AmazonS3Exception notFoundException = new AmazonS3Exception("Not Found");
         notFoundException.setStatusCode(HttpStatus.NOT_FOUND.value());
         when(contentService.loadResource(uri)).thenThrow(notFoundException);
+        URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
+
+        http.perform(get(restUri)
+            .param("resourcePath", uri.toString()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturn404ForNoResourceFound() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        when(contentService.loadResource(uri)).thenThrow(FileNotFoundException.class);
         URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
 
         http.perform(get(restUri)
