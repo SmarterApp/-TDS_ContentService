@@ -25,7 +25,7 @@ import tds.content.repositories.RendererSpecRepository;
 import static org.apache.commons.io.Charsets.UTF_8;
 
 @Repository
-@Profile("!s3Content")
+@Profile("fileSystemContent")
 public class FileSystemRendererSpecRepository implements RendererSpecRepository {
     @Override
     public String findOne(final String rendererSpecPath) throws IOException {

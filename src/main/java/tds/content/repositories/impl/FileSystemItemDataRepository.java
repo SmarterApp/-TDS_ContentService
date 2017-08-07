@@ -26,7 +26,7 @@ import tds.content.repositories.ItemDataRepository;
 import static org.apache.commons.io.Charsets.UTF_8;
 
 @Repository
-@Profile("!s3Content")
+@Profile("fileSystemContent")
 public class FileSystemItemDataRepository implements ItemDataRepository {
     @Override
     public String findOne(final String itemPath) throws IOException {

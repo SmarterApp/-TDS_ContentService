@@ -34,8 +34,7 @@ import static org.apache.commons.lang3.StringUtils.join;
  * This implementation of a RendererSpecRepository reads information on S3.
  */
 @Repository
-@Primary
-@Profile("s3Content")
+@Profile("!fileSystemContent")
 public class S3RendererSpecRepository implements RendererSpecRepository {
 
     private final AmazonS3 s3Client;

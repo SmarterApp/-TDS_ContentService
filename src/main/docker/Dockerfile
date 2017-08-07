@@ -1,7 +1,5 @@
 FROM frolvlad/alpine-oraclejdk8:slim
 
-EXPOSE 8000
-
 VOLUME /tmp
 ADD docker-startup.sh /
 ADD tds-content-service-*.jar tds-content-service.jar

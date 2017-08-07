@@ -22,7 +22,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -37,8 +36,7 @@ import static org.apache.commons.io.Charsets.UTF_8;
 import static org.apache.commons.io.FilenameUtils.normalize;
 
 @Repository
-@Primary
-@Profile("s3Content")
+@Profile("!fileSystemContent")
 public class S3ItemDataRepository implements ItemDataRepository {
     private final Logger log = LoggerFactory.getLogger(S3ItemDataRepository.class);
     private final AmazonS3 s3Client;
