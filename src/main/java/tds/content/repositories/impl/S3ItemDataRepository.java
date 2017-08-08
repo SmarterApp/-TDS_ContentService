@@ -58,7 +58,14 @@ public class S3ItemDataRepository implements ItemDataRepository {
 
             return IOUtils.toString(item.getObjectContent(), UTF_8);
         } catch (final AmazonS3Exception ex) {
-            throw new IOException("Unable to read S3 item: " + itemLocation, ex);
+            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", itemDataPath);
+                throw ex;
+            } else if (ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                log.warn("AmazonS3Exception thrown with a status of \"Forbidden\" for path {}.", itemDataPath);
+                throw ex;
+            }
+            throw new IllegalArgumentException("Unable to read S3 item: " + itemDataPath);
         }
     }
 

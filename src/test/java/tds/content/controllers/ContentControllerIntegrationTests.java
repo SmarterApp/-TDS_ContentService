@@ -139,4 +139,30 @@ public class ContentControllerIntegrationTests {
             .param("resourcePath", uri.toString()))
             .andExpect(status().isForbidden());
     }
+
+    @Test
+    public void shouldReturn404ForNoResourceFoundGetItemData() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        AmazonS3Exception notFoundException = new AmazonS3Exception("Not Found");
+        notFoundException.setStatusCode(HttpStatus.NOT_FOUND.value());
+        when(contentService.loadData(uri)).thenThrow(notFoundException);
+        URI restUri = UriComponentsBuilder.fromUriString("/loadData").build().toUri();
+
+        http.perform(get(restUri)
+            .param("itemPath", uri.toString()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturn403ForAccessDeniedGetItemData() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        AmazonS3Exception acessDeniedException = new AmazonS3Exception("Access Denied");
+        acessDeniedException.setStatusCode(HttpStatus.FORBIDDEN.value());
+        when(contentService.loadData(uri)).thenThrow(acessDeniedException);
+        URI restUri = UriComponentsBuilder.fromUriString("/loadData").build().toUri();
+
+        http.perform(get(restUri)
+            .param("itemPath", uri.toString()))
+            .andExpect(status().isForbidden());
+    }
 }

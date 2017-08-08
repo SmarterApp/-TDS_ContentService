@@ -111,6 +111,13 @@ public class ContentController {
             return ResponseEntity.ok(contentService.loadData(new URI(itemPath)));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        } catch (final AmazonS3Exception ex) {
+            if (ex.getStatusCode() == org.apache.http.HttpStatus.SC_NOT_FOUND) {
+                return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            } else if (ex.getStatusCode() == org.apache.http.HttpStatus.SC_FORBIDDEN) {
+                return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+            }
+            throw ex;
         }
     }
 }
