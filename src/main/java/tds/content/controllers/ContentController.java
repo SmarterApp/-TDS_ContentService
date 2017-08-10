@@ -111,6 +111,8 @@ public class ContentController {
             return ResponseEntity.ok(contentService.loadData(new URI(itemPath)));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
+        } catch (final FileNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 }

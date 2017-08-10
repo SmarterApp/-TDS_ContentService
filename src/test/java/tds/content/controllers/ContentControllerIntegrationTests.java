@@ -139,4 +139,15 @@ public class ContentControllerIntegrationTests {
             .param("resourcePath", uri.toString()))
             .andExpect(status().isForbidden());
     }
+
+    @Test
+    public void shouldReturn404ForNoResourceFoundGetItemData() throws Exception {
+        URI uri = new URI("/path/to/item.xml");
+        when(contentService.loadData(uri)).thenThrow(FileNotFoundException.class);
+        URI restUri = UriComponentsBuilder.fromUriString("/loadData").build().toUri();
+
+        http.perform(get(restUri)
+            .param("itemPath", uri.toString()))
+            .andExpect(status().isNotFound());
+    }
 }

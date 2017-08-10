@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -58,7 +59,11 @@ public class S3ItemDataRepository implements ItemDataRepository {
 
             return IOUtils.toString(item.getObjectContent(), UTF_8);
         } catch (final AmazonS3Exception ex) {
-            throw new IOException("Unable to read S3 item: " + itemLocation, ex);
+            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND || ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", itemDataPath);
+                throw new FileNotFoundException(ex.getMessage());
+            }
+            throw new IllegalArgumentException("Unable to read S3 item: " + itemDataPath);
         }
     }
 
