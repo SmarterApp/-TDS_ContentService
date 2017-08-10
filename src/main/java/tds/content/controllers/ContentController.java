@@ -30,13 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
+
+import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 @RestController
 public class ContentController {
@@ -51,11 +55,11 @@ public class ContentController {
     @ResponseBody
     public ResponseEntity<ITSDocument> getItemDocument(@RequestParam final String itemPath, @RequestParam(required = false) final String contextPath,
                                                        @RequestParam(required = false) final boolean oggAudioSupport,
-                                                       @RequestBody final AccLookup accLookup) {
+                                                       @RequestBody final AccLookup accLookup) throws IOException {
         ITSDocument itemDocument;
 
         try {
-            itemDocument = contentService.loadItemDocument(new URI(itemPath), accLookup, contextPath, oggAudioSupport);
+            itemDocument = contentService.loadItemDocument(getEncodedUri(itemPath), accLookup, contextPath, oggAudioSupport);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
@@ -69,7 +73,7 @@ public class ContentController {
         InputStream inputStream;
 
         try {
-            inputStream = contentService.loadResource(new URI(resourcePath));
+            inputStream = contentService.loadResource(getEncodedUri(resourcePath));
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided resource path '%s' was malformed", resourcePath));
         } catch (final AmazonS3Exception ex) {
@@ -98,7 +102,7 @@ public class ContentController {
                                                        @RequestParam final String contextPath,
                                                        @RequestParam final boolean oggAudioSupport) throws IOException {
         try {
-            return ResponseEntity.ok(contentService.loadWordListItem(new URI(itemPath), contextPath, oggAudioSupport));
+            return ResponseEntity.ok(contentService.loadWordListItem(getEncodedUri(itemPath), contextPath, oggAudioSupport));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         }
@@ -108,11 +112,15 @@ public class ContentController {
     @ResponseBody
     public ResponseEntity<String> getItemData(@RequestParam final String itemPath) throws IOException {
         try {
-            return ResponseEntity.ok(contentService.loadData(new URI(itemPath)));
+            return ResponseEntity.ok(contentService.loadData(getEncodedUri(itemPath)));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(String.format("The provided item path '%s' was malformed", itemPath));
         } catch (final FileNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    private URI getEncodedUri(final String uriPath) throws URISyntaxException, UnsupportedEncodingException {
+        return new URI(URLEncoder.encode(uriPath, UTF_8));
     }
 }
