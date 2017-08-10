@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 
 import tds.content.repositories.ItemDataRepository;
 
@@ -30,18 +31,19 @@ import static org.apache.commons.io.Charsets.UTF_8;
 public class FileSystemItemDataRepository implements ItemDataRepository {
     @Override
     public String findOne(final String itemPath) throws IOException {
-        return Files.toString(new File(itemPath), UTF_8);
+        File itemFile = new File(URLDecoder.decode(itemPath, org.apache.commons.lang3.CharEncoding.UTF_8));
+        return Files.toString(itemFile, UTF_8);
     }
 
     @Override
     public InputStream findResource(final String resourcePath) throws IOException {
-        File resourceFile = new File(resourcePath);
+        File resourceFile = new File(URLDecoder.decode(resourcePath, org.apache.commons.lang3.CharEncoding.UTF_8));
         return Files.asByteSource(resourceFile).openStream();
     }
 
     @Override
     public boolean doesItemExists(final String itemPath) throws IOException {
-        File itemFile = new File(itemPath);
+        File itemFile = new File(URLDecoder.decode(itemPath, org.apache.commons.lang3.CharEncoding.UTF_8));
         return itemFile.isFile();
     }
 }
