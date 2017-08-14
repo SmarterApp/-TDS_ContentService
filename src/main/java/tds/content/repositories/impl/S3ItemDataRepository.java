@@ -29,7 +29,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 
+import tds.common.web.exceptions.NotFoundException;
 import tds.content.configuration.S3Properties;
 import tds.content.repositories.ItemDataRepository;
 
@@ -61,7 +63,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
         } catch (final AmazonS3Exception ex) {
             if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND || ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
                 log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", itemDataPath);
-                throw new FileNotFoundException(ex.getMessage());
+                throw new NotFoundException(ex.getMessage());
             }
             throw new IllegalArgumentException("Unable to read S3 item: " + itemDataPath);
         }
@@ -77,12 +79,9 @@ public class S3ItemDataRepository implements ItemDataRepository {
 
             return item.getObjectContent();
         } catch (final AmazonS3Exception ex) {
-            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", resourceLocation);
-                throw ex;
-            } else if (ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
-                log.warn("AmazonS3Exception thrown with a status of \"Forbidden\" for path {}.", resourceLocation);
-                throw ex;
+            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND || ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", resourcePath);
+                throw new NotFoundException(ex.getMessage());
             }
             throw ex;
         }
@@ -104,7 +103,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
      * @return The resource path relative to our S3 bucket and prefix
      */
     private String buildPath(final String itemDataPath) {
-        final File file = new File(normalize(itemDataPath));
+        final File file = new File(normalize(URLDecoder.decode(itemDataPath)));
         final String dirName = file.getParentFile() == null
             ? ""
             : file.getParentFile().getName();
