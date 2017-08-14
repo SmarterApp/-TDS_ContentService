@@ -31,7 +31,7 @@ import tds.common.web.resources.ExceptionMessageResource;
  * Adds ContentService specific handling by extending the Common exception handling
  */
 @ControllerAdvice
-public class ContentExceptionAdvice extends ExceptionAdvice{
+public class ContentExceptionAdvice extends ExceptionAdvice {
     private final static Logger LOG = LoggerFactory.getLogger(ContentExceptionAdvice.class);
 
     @ExceptionHandler(FileNotFoundException.class)
