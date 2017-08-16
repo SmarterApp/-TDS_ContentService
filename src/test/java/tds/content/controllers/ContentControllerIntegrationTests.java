@@ -102,6 +102,22 @@ public class ContentControllerIntegrationTests {
     }
 
     @Test
+    public void shouldReturnResourceWithSpaces() throws Exception {
+        InputStream stream = new ByteArrayInputStream("Hello".getBytes());
+        URI uri = UriComponentsBuilder.fromUriString("/path/to/item with spaces.xml").build().toUri();
+
+        when(contentService.loadResource(isA(URI.class))).thenReturn(stream);
+        URI restUri = UriComponentsBuilder.fromUriString("/resource").build().toUri();
+
+        MvcResult result = http.perform(get(restUri)
+            .param("resourcePath", uri.toString()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Hello");
+    }
+
+    @Test
     public void shouldReturn404ForNoResourceFoundGetResource() throws Exception {
         URI uri = new URI("/path/to/item.xml");
         when(contentService.loadResource(isA(URI.class))).thenThrow(NotFoundException.class);
