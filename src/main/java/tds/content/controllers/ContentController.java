@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,10 +84,6 @@ public class ContentController {
     }
 
     private URI getEncodedUri(final String uriPath) {
-        try {
-            return new URI(URLEncoder.encode(uriPath, UTF_8));
-        } catch (URISyntaxException | UnsupportedEncodingException e) {
-            throw new IllegalArgumentException(String.format("The provided resource path '%s' was malformed", uriPath));
-        }
+        return UriComponentsBuilder.fromUriString(uriPath).build().toUri();
     }
 }

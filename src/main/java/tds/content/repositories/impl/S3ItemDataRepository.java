@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import tds.common.web.exceptions.NotFoundException;
@@ -103,16 +104,20 @@ public class S3ItemDataRepository implements ItemDataRepository {
      * @return The resource path relative to our S3 bucket and prefix
      */
     private String buildPath(final String itemDataPath) {
-        final File file = new File(normalize(URLDecoder.decode(itemDataPath)));
-        final String dirName = file.getParentFile() == null
-            ? ""
-            : file.getParentFile().getName();
-        // If the directory name is not present, default to "items"
-        final String itemsOrStimuli = StringUtils.isEmpty(dirName)
-            ? "items"
-            : file.getParentFile().getParentFile().getName();
+        try {
+            final File file = new File(normalize(URLDecoder.decode(itemDataPath, "UTF-8")));
+            final String dirName = file.getParentFile() == null
+                ? ""
+                : file.getParentFile().getName();
+            // If the directory name is not present, default to "items"
+            final String itemsOrStimuli = StringUtils.isEmpty(dirName)
+                ? "items"
+                : file.getParentFile().getParentFile().getName();
 
 
-        return normalize(itemsOrStimuli + "/" + dirName + "/" + file.getName());
+            return normalize(itemsOrStimuli + "/" + dirName + "/" + file.getName());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Encoding exception while transforming a uri to an s3 path", e);
+        }
     }
 }
