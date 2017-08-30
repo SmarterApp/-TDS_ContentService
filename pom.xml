@@ -28,12 +28,14 @@
         <tds-common.version>3.1.1.RELEASE</tds-common.version>
         <item-renderer.version>4.0.2</item-renderer.version>
         <item-scoring.version>4.0.0</item-scoring.version>
+        <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
     </properties>
 
     <scm>
         <connection>scm:git:https://github.com/SmarterApp/TDS_ContentService.git</connection>
-        <developerConnection>scm:git:https://git@github.com/SmarterApp/TDS_ContentService.git</developerConnection>
+        <developerConnection>scm:git:git://github.com/SmarterApp/TDS_ContentService.git</developerConnection>
         <url>https://github.com/SmarterApp/TDS_ContentService</url>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
@@ -115,6 +117,15 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${maven.release.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
