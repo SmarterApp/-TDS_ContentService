@@ -26,7 +26,7 @@
         <assertj.version>3.4.1</assertj.version>
         <mockito.version>1.10.19</mockito.version>
         <tds-common.version>3.1.1.RELEASE</tds-common.version>
-        <item-renderer.version>4.0.2</item-renderer.version>
+        <item-renderer.version>4.0.3-SNAPSHOT</item-renderer.version>
         <item-scoring.version>4.0.0</item-scoring.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
     </properties>
