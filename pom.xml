@@ -24,9 +24,9 @@
         <docker.image.prefix>smarterbalanced</docker.image.prefix>
         <assertj.version>3.4.1</assertj.version>
         <mockito.version>1.10.19</mockito.version>
-        <tds-common.version>3.1.3</tds-common.version>
         <item-renderer.version>4.0.6</item-renderer.version>
-        <item-scoring.version>4.0.1</item-scoring.version>
+        <tds-common.version>4.0.1.RELEASE</tds-common.version>
+        <item-scoring.version>4.0.2.RELEASE</item-scoring.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
     </properties>
 
