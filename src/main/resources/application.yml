@@ -1,0 +1,57 @@
+#Configure the Spring Actuator endpoints to require an authenticated user with the MANAGEMENT role
+management:
+  security:
+    roles: MANAGEMENT
+
+---
+spring:
+  profiles: local-development
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  cloud:
+    bus:
+      enabled: false
+
+#Port defined in TDS_Build:docker-compose.yml
+  rabbitmq:
+    port: 32846
+
+tds:
+  cache:
+    enabled: false
+  encryption-enabled: true
+  encryption-key: Thisisanincrediblylongkeythatiscertainlylongerthantwentyfourcharacters
+
+
+management:
+  health:
+    redis:
+      enabled: false
+    rabbit:
+      enabled: false
+
+#Configure the default Spring Security user with the MANAGEMENT role
+security:
+  user:
+    name: user
+    password: password
+    role: MANAGEMENT
+
+server:
+  port: 8082
+  undertow:
+    buffer-size: 16384
+    buffers-per-region: 20
+    io-threads: 64
+    worker-threads: 512
+    direct-buffers: true
+
+content:
+  s3:
+    access-key: ${s3.key}
+    secret-key: ${s3.secret}
+    bucket-name: tds-resources
+    item-prefix: item-content/bank/
+
