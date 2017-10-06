@@ -82,7 +82,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
         } catch (final AmazonS3Exception ex) {
             if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND || ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
                 log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", resourcePath);
-                throw new NotFoundException(ex.getMessage());
+                throw new NotFoundException(String.format("Could not find item for %s.  Error is: %s", resourcePath, ex.getMessage()));
             }
             throw ex;
         }
