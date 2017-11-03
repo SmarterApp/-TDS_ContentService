@@ -40,7 +40,7 @@ security:
     role: MANAGEMENT
 
 server:
-  port: 8082
+  port: 32848
   undertow:
     buffer-size: 16384
     buffers-per-region: 20
