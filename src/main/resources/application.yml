@@ -53,5 +53,5 @@ content:
     access-key: ${s3.key}
     secret-key: ${s3.secret}
     bucket-name: tds-resources
-    item-prefix: item-content/bank/
+    item-prefix: item-content/dev/
 
