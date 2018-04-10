@@ -24,6 +24,14 @@ import tds.itemrenderer.data.xml.wordlist.Itemrelease;
  */
 public interface ItemXmlParser {
     /**
+     * Parses the item release xml data
+     *
+     * @param itemData The stringified item xml data
+     * @return An unmarshalled {@link tds.itemrenderer.data.xml.itemrelease.Itemrelease}
+     */
+    tds.itemrenderer.data.xml.itemrelease.Itemrelease unmarshallItemXml(final URI uri, final String itemData) throws JAXBException;
+
+    /**
      * Parses the item xml data at the {@link java.net.URI} provided
      *
      * @param uri The URI of the item metadata file
