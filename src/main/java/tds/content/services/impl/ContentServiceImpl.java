@@ -29,8 +29,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import tds.common.cache.CacheType;
@@ -46,6 +48,7 @@ import tds.itemrenderer.data.AccProperties;
 import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.itemrelease.Rubriclist;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 import tds.itemrenderer.data.xml.wordlist.Keyword;
 import tds.itemrenderer.processing.ITSDocumentProcessingException;
@@ -77,16 +80,18 @@ public class ContentServiceImpl implements ContentService {
         this.encryption = encryption;
     }
 
-    @Override
-    @Cacheable(CacheType.LONG_TERM)
-    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport) {
-        final String itemDataXml;
-
+    protected String readItemDataXml(final URI uri) {
         try {
-            itemDataXml = itemDataService.readData(uri);
+            return itemDataService.readData(uri);
         } catch (IOException e) {
             throw new ITSDocumentProcessingException(e);
         }
+    }
+
+    @Override
+    @Cacheable(CacheType.LONG_TERM)
+    public ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport) {
+        final String itemDataXml = readItemDataXml(uri);
 
         ITSDocument itsDocument = itemXmlParser.parseItemDocument(uri, itemDataXml);
 
@@ -102,6 +107,21 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    public Optional<Rubriclist> loadItemRubric(final URI uri) {
+        final String itemDataXml = readItemDataXml(uri);
+        try {
+            tds.itemrenderer.data.xml.itemrelease.Itemrelease itemRelease = itemXmlParser.unmarshallItemXml(uri, itemDataXml);
+            return itemRelease.getItemPassage().getContent().stream().
+                filter(content -> content.getLanguage().equalsIgnoreCase("enu")).
+                map(content -> content.getRubriclist()).findFirst();
+        } catch (JAXBException e) {
+            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the word list \"%s\"", uri), e);
+        }
+
+
+    }
+
+        @Override
     @Cacheable(CacheType.LONG_TERM)
     public String loadData(final URI resourcePath) throws IOException {
         return itemDataService.readData(resourcePath);

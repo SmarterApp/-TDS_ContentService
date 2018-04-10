@@ -32,10 +32,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Optional;
 
 import tds.content.services.ContentService;
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.itemrelease.Rubriclist;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -55,6 +58,12 @@ public class ContentController {
                                                        @RequestParam(required = false) final boolean oggAudioSupport,
                                                        @RequestBody final AccLookup accLookup) {
         return ResponseEntity.ok(contentService.loadItemDocument(getEncodedUri(itemPath), accLookup, contextPath, oggAudioSupport));
+    }
+
+    @GetMapping(value = "/rubric", produces = MediaType.APPLICATION_XML_VALUE)
+    @ResponseBody
+    public ResponseEntity<Optional<Rubriclist>> getRubric(@RequestParam final String itemPath) {
+        return ResponseEntity.ok(contentService.loadItemRubric(getEncodedUri(itemPath)));
     }
 
     @GetMapping(value = "/resource")
