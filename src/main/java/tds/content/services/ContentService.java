@@ -17,9 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import tds.itemrenderer.data.AccLookup;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.itemrelease.Rubriclist;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 
 /**
@@ -36,6 +38,14 @@ public interface ContentService {
      * @return {@link tds.itemrenderer.data.IITSDocument}
      */
     ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport);
+
+    /**
+     * Loads the {@link tds.itemrenderer.data.xml.itemrelease.Rubriclist} representing item's rubric
+     *
+     * @param uri             the URI to the document
+     * @return {@link tds.itemrenderer.data.xml.itemrelease.Rubriclist}
+     */
+    Optional<Rubriclist> loadItemRubric(final URI uri);
 
     /**
      * Loads the resource at the specified path

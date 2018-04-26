@@ -74,7 +74,7 @@ public class ItemXmlParserImpl implements ItemXmlParser {
         return document;
     }
 
-    private Itemrelease unmarshallItemXml(final URI itemPath, final String itemData) {
+    public Itemrelease unmarshallItemXml(final URI itemPath, final String itemData) {
         try {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             StringReader reader = removeBomIfPresent(itemData);
