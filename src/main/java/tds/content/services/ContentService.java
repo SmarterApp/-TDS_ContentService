@@ -40,12 +40,12 @@ public interface ContentService {
     ITSDocument loadItemDocument(final URI uri, final AccLookup accommodations, final String contextPath, final boolean oggAudioSupport);
 
     /**
-     * Loads the {@link tds.itemrenderer.data.xml.itemrelease.Rubriclist} representing item's rubric
+     * Loads the item's rubric
      *
-     * @param uri             the URI to the document
-     * @return {@link tds.itemrenderer.data.xml.itemrelease.Rubriclist}
+     * @param uri the URI to the document
+     * @return {@link Optional<String>} rubric xml contents
      */
-    Optional<Rubriclist> loadItemRubric(final URI uri);
+    Optional<String> loadItemRubric(final URI uri);
 
     /**
      * Loads the resource at the specified path

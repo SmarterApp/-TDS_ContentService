@@ -21,11 +21,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
@@ -48,6 +63,7 @@ import tds.itemrenderer.data.AccProperties;
 import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.itemrelease.Content;
 import tds.itemrenderer.data.xml.itemrelease.Rubriclist;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 import tds.itemrenderer.data.xml.wordlist.Keyword;
@@ -107,15 +123,29 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public Optional<Rubriclist> loadItemRubric(final URI uri) {
+    public Optional<String> loadItemRubric(final URI uri) {
         final String itemDataXml = readItemDataXml(uri);
         try {
-            tds.itemrenderer.data.xml.itemrelease.Itemrelease itemRelease = itemXmlParser.unmarshallItemXml(uri, itemDataXml);
-            return itemRelease.getItemPassage().getContent().stream().
-                filter(content -> content.getLanguage().equalsIgnoreCase("enu")).
-                map(content -> content.getRubriclist()).findFirst();
-        } catch (JAXBException e) {
-            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the word list \"%s\"", uri), e);
+            final InputSource source = new InputSource(new StringReader(itemDataXml));
+            // parse the XML as a W3C Document
+            final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            final Document document = builder.parse(source);
+            final XPath xpath = XPathFactory.newInstance().newXPath();
+            final String expression = "/itemrelease/item/content/rubriclist";
+            final NodeList nodeList = (NodeList)xpath.evaluate(expression, document, XPathConstants.NODESET);
+            if (nodeList.getLength() > 0) {
+                final StringWriter sw = new StringWriter();
+                final Transformer serializer = TransformerFactory.newInstance().newTransformer();
+                serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                serializer.transform(new DOMSource(nodeList.item(0)), new StreamResult(sw));
+                final String rubricListXml = sw.toString();
+
+                return Optional.of(rubricListXml);
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the rubric list \"%s\"", uri), e);
         }
 
 

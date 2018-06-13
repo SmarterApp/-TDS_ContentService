@@ -19,6 +19,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class S3ItemDataRepository implements ItemDataRepository {
             final S3Object item = s3Client.getObject(new GetObjectRequest(
                 s3Properties.getBucketName(), itemLocation));
 
-            return IOUtils.toString(item.getObjectContent(), UTF_8);
+            return IOUtils.toString(new BOMInputStream(item.getObjectContent()), UTF_8);
         } catch (final AmazonS3Exception ex) {
             if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND || ex.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
                 log.warn("AmazonS3Exception thrown with a status of \"Not Found\" for path {}.", itemDataPath);
