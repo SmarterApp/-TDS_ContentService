@@ -97,6 +97,7 @@ public class ContentServiceImpl implements ContentService {
         this.properties = contentServiceProperties;
         this.encryption = encryption;
         this.rubricHelper = new RubricHelper();
+        tds.itemrenderer.apip.APIPCsvLoader.loadRules();
     }
 
     static class RubricHelper {
