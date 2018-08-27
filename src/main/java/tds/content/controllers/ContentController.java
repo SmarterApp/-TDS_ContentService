@@ -60,9 +60,9 @@ public class ContentController {
         return ResponseEntity.ok(contentService.loadItemDocument(getEncodedUri(itemPath), accLookup, contextPath, oggAudioSupport));
     }
 
-    @GetMapping(value = "/rubric", produces = MediaType.APPLICATION_XML_VALUE)
+    @GetMapping(value = "/rubric")
     @ResponseBody
-    public ResponseEntity<Optional<Rubriclist>> getRubric(@RequestParam final String itemPath) {
+    public ResponseEntity<Optional<String>> getRubric(@RequestParam final String itemPath) {
         return ResponseEntity.ok(contentService.loadItemRubric(getEncodedUri(itemPath)));
     }
 
