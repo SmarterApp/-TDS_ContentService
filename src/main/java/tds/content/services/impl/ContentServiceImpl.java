@@ -21,11 +21,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
@@ -48,6 +64,7 @@ import tds.itemrenderer.data.AccProperties;
 import tds.itemrenderer.data.ITSAttachment;
 import tds.itemrenderer.data.ITSContent;
 import tds.itemrenderer.data.ITSDocument;
+import tds.itemrenderer.data.xml.itemrelease.Content;
 import tds.itemrenderer.data.xml.itemrelease.Rubriclist;
 import tds.itemrenderer.data.xml.wordlist.Itemrelease;
 import tds.itemrenderer.data.xml.wordlist.Keyword;
@@ -68,6 +85,7 @@ public class ContentServiceImpl implements ContentService {
     private final ItemDataService itemDataService;
     private final ContentServiceProperties properties;
     private final IEncryption encryption;
+    private final RubricHelper rubricHelper;
 
     @Autowired
     public ContentServiceImpl(final ItemXmlParser itemXmlParser,
@@ -78,6 +96,43 @@ public class ContentServiceImpl implements ContentService {
         this.itemDataService = itemDataService;
         this.properties = contentServiceProperties;
         this.encryption = encryption;
+        this.rubricHelper = new RubricHelper();
+        tds.itemrenderer.apip.APIPCsvLoader.loadRules();
+    }
+
+    static class RubricHelper {
+        private static final String RUBRIC_LIST_XPATH = "/itemrelease/item/content/rubriclist";
+
+        private final DocumentBuilder builder;
+        private final XPathExpression rubricListExpression;
+        private final Transformer serializer;
+
+        RubricHelper() {
+            try {
+                this.builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                this.rubricListExpression = XPathFactory.newInstance().newXPath().compile(RUBRIC_LIST_XPATH);
+                this.serializer = TransformerFactory.newInstance().newTransformer();
+                serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Optional<String> getRubricList(final String itemDataXml) throws Exception {
+            final InputSource source = new InputSource(new StringReader(itemDataXml));
+            // parse the XML as a W3C Document
+            final Document document = builder.parse(source);
+
+            final NodeList nodeList = (NodeList)rubricListExpression.evaluate(document, XPathConstants.NODESET);
+            if (nodeList.getLength() > 0) {
+                final StringWriter rubricXml = new StringWriter();
+                serializer.transform(new DOMSource(nodeList.item(0)), new StreamResult(rubricXml));
+                return Optional.of(rubricXml.toString());
+            } else {
+                return Optional.empty();
+            }
+
+        }
     }
 
     protected String readItemDataXml(final URI uri) {
@@ -107,21 +162,17 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public Optional<Rubriclist> loadItemRubric(final URI uri) {
+    @Cacheable(CacheType.LONG_TERM)
+    public Optional<String> loadItemRubric(final URI uri) {
         final String itemDataXml = readItemDataXml(uri);
         try {
-            tds.itemrenderer.data.xml.itemrelease.Itemrelease itemRelease = itemXmlParser.unmarshallItemXml(uri, itemDataXml);
-            return itemRelease.getItemPassage().getContent().stream().
-                filter(content -> content.getLanguage().equalsIgnoreCase("enu")).
-                map(content -> content.getRubriclist()).findFirst();
-        } catch (JAXBException e) {
-            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the word list \"%s\"", uri), e);
+            return rubricHelper.getRubricList(itemDataXml);
+        } catch (Exception e) {
+            throw new ITSDocumentProcessingException(String.format("The XML schema was not valid for the rubric list \"%s\"", uri), e);
         }
-
-
     }
 
-        @Override
+    @Override
     @Cacheable(CacheType.LONG_TERM)
     public String loadData(final URI resourcePath) throws IOException {
         return itemDataService.readData(resourcePath);
