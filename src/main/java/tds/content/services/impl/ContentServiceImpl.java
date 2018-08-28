@@ -13,6 +13,8 @@
 
 package tds.content.services.impl;
 
+import AIR.Common.Utilities.Path;
+import AIR.Common.Web.UrlHelper;
 import TDS.Shared.Security.IEncryption;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -271,15 +273,38 @@ public class ContentServiceImpl implements ContentService {
         // replace urls in the nested HTML member of Itemrelease object
         final Stream<Keyword> keywords = itemrelease.getItem().getKeywordList().getKeyword().stream();
         keywords
-            .filter(keyword -> StringUtils.isBlank(keyword.getIndex()))
+            .filter(keyword -> !StringUtils.isBlank(keyword.getIndex()))
             .map(Keyword::getHtml)
             .flatMap(List::stream)
-            .filter(html -> StringUtils.isBlank(html.getListType()) || StringUtils.isBlank(html.getListCode()) || isBlankHtmlContent(html.getContent()))
+            .filter(html -> !(StringUtils.isBlank(html.getListType()) || StringUtils.isBlank(html.getListCode()) || isBlankHtmlContent(html.getContent())))
             .forEach(html -> {
                 final ITSUrlResolver2 resolver = new ITSUrlResolver2(baseUri, properties.isEncryptionEnabled(), contextPath, encryption) {
                     @Override
                     protected String audioSwapHack(String fileName) {
                         return audioSwap(this._filePath, fileName, oggAudioSupport);
+                    }
+
+                    @Override
+                    protected String fileMatch(String tagName, String match)  {
+                        String fileName = match;
+
+                        // if already a http url then leave as is
+                        if (UrlHelper.IsHttpProtocol(fileName))
+                        {
+                            return fileName;
+                        }
+
+                        // HACK: replace ogg with m4a on some platforms
+                        if ("a".equalsIgnoreCase(tagName) && "ogg".equalsIgnoreCase(Path.getExtension(fileName)))
+                        {
+                            // uses user-agent detection
+                            fileName = audioSwapHack(fileName);
+                        }
+
+                        // add url to captured resources collection
+                        addParsedMediaFile(fileName);
+
+                        return fileName;
                     }
                 };
                 final String content = resolver.resolveResourceUrls(html.getContent());
